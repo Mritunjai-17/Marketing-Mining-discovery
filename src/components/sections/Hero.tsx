@@ -1,0 +1,332 @@
+"use client";
+
+import React, { useEffect, useRef } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Globe } from "@/components/ui/Globe";
+import {
+  CursorParallax,
+  MineralDustField,
+  SeismicSweep,
+  GlowPulse,
+  OrbitTooltips,
+  StarfieldBackground,
+  ConnectionArcs,
+  ParallaxState,
+} from "./hero-layers";
+import { ArrowRight, TrendingUp, Globe2 } from "lucide-react";
+
+export interface HeroProps {
+  /** Background Variant: "navy-topo" (solid navy + geological lines) or "dark-blur" */
+  bgVariant?: "navy-topo" | "dark-blur";
+  /** Layer 1: Cursor-Reactive Parallax Depth */
+  enableParallax?: boolean;
+  /** Layer 2: Ambient Gold/White Mineral Dust Field Canvas */
+  enableMineralDust?: boolean;
+  /** Layer 3: Seismic Scan Sweep Radar Line */
+  enableSeismicSweep?: boolean;
+  /** Layer 4: Ambient Gold Glow Breathing Pulse */
+  enableGlowPulse?: boolean;
+  /** Layer 5: Interactive Orbit Ring Marker Tooltips */
+  enableOrbitTooltips?: boolean;
+  /** Layer A: Starfield Depth Canvas Background */
+  enableStarfield?: boolean;
+  /** Layer B & C: Animated Connection Arcs & Floating Location Tags */
+  enableConnectionArcs?: boolean;
+}
+
+const bodyText =
+  "Mining Discovery puts your exploration milestones, production updates, and corporate news directly in front of institutional investors, industry analysts, and 150,000+ mining decision-makers worldwide.";
+
+export const Hero: React.FC<HeroProps> = ({
+  bgVariant = "navy-topo",
+  enableParallax = true,
+  enableMineralDust = true,
+  enableSeismicSweep = true,
+  enableGlowPulse = true,
+  enableOrbitTooltips = true,
+  enableStarfield = true,
+  enableConnectionArcs = true,
+}) => {
+  const headlineRef = useRef<HTMLHeadingElement | null>(null);
+  const paragraphRef = useRef<HTMLParagraphElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const headlineWords = headlineRef.current?.querySelectorAll(".gsap-word");
+      const paragraphWords = paragraphRef.current?.querySelectorAll(".gsap-body-word");
+
+      if (headlineWords && headlineWords.length > 0) {
+        const tl = gsap.timeline();
+
+        tl.fromTo(
+          headlineWords,
+          {
+            y: 30,
+            opacity: 0,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.07,
+            ease: "power3.out",
+          }
+        );
+
+        if (paragraphWords && paragraphWords.length > 0) {
+          tl.fromTo(
+            paragraphWords,
+            {
+              y: 20,
+              opacity: 0,
+            },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.6,
+              stagger: 0.015,
+              ease: "power2.out",
+            },
+            "-=0.5"
+          );
+        }
+
+        gsap.to(headlineWords, {
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            end: "bottom 20%",
+            scrub: 0.5,
+            invalidateOnRefresh: true,
+          },
+          y: -40,
+          opacity: 0.2,
+          stagger: 0.02,
+          ease: "none",
+        });
+
+        if (paragraphWords && paragraphWords.length > 0) {
+          gsap.to(paragraphWords, {
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: "bottom 20%",
+              scrub: 0.5,
+              invalidateOnRefresh: true,
+            },
+            y: -30,
+            opacity: 0.2,
+            stagger: 0.01,
+            ease: "none",
+          });
+        }
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const bodyWords = bodyText.split(" ");
+
+  return (
+    <CursorParallax disabled={!enableParallax}>
+      {(parallax: ParallaxState) => (
+        <section
+          ref={sectionRef}
+          className="relative bg-[#0B1220] text-white pt-14 pb-6 sm:pt-16 sm:pb-8 lg:pt-16 lg:pb-8 border-b border-white/10 overflow-hidden font-sans"
+        >
+          {/* LAYER A: STARFIELD DEPTH BACKGROUND CANVAS */}
+          <StarfieldBackground disabled={!enableStarfield} />
+
+          {/* BASE BACKGROUND GRADIENT */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#0B1F3A] to-[#061224] -z-20" />
+
+          {/* LAYER 4: AMBIENT GOLD GLOW PULSE WITH CURSOR PARALLAX */}
+          <div
+            style={{
+              transform: `translate3d(${parallax.glowX}px, ${parallax.glowY}px, 0)`,
+              transition: "transform 0.1s linear",
+            }}
+          >
+            <GlowPulse disabled={!enableGlowPulse} />
+          </div>
+
+          {/* LAYER 2: MINERAL DUST PARTICLE CANVAS FIELD */}
+          <MineralDustField disabled={!enableMineralDust} />
+
+          {/* LAYER 3: SEISMIC RADAR SCAN SWEEP */}
+          <SeismicSweep disabled={!enableSeismicSweep} />
+
+          {/* GEOLOGICAL CONTOUR LINES WITH PARALLAX */}
+          {bgVariant === "navy-topo" && (
+            <div
+              className="absolute inset-0 -z-10 pointer-events-none opacity-[0.07] overflow-hidden transition-transform duration-100 ease-out"
+              style={{
+                transform: `translate3d(${parallax.glowX * 0.5}px, ${parallax.glowY * 0.5}px, 0)`,
+              }}
+            >
+              <svg
+                className="w-full h-full object-cover"
+                viewBox="0 0 1200 800"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M1200,100 C900,150 700,50 400,200 C100,350 50,600 0,700"
+                  stroke="#D4AF37"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M1200,250 C950,280 800,180 500,320 C200,460 100,680 0,800"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M1200,400 C1000,420 850,350 600,480 C350,610 150,750 0,900"
+                  stroke="#D4AF37"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M1200,550 C1050,560 900,500 700,620 C500,740 250,850 0,950"
+                  stroke="#FFFFFF"
+                  strokeWidth="1"
+                />
+              </svg>
+            </div>
+          )}
+
+          {/* DARKENED BLURRED OPTION B */}
+          {bgVariant === "dark-blur" && (
+            <div className="absolute inset-0 -z-10 pointer-events-none bg-black/75 backdrop-blur-3xl" />
+          )}
+
+          {/* SUBTLE NOISE GRAIN OVERLAY */}
+          <div className="absolute inset-0 -z-10 opacity-[0.025] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
+
+          {/* MAIN VIEWPORT LAYOUT CONTAINER */}
+          <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+              
+              {/* LEFT COLUMN: Editorial Copy & CTAs */}
+              <div className="lg:col-span-6 flex flex-col items-start z-20 lg:pr-2 pt-1">
+                
+                {/* Eyebrow Badge */}
+                <div className="mb-3.5">
+                  <Badge
+                    variant="gold"
+                    size="md"
+                    className="gap-2 shadow-sm bg-[#B8860B]/20 text-[#D4AF37] border border-[#B8860B]/40 px-3.5 py-1.5 font-sans uppercase tracking-[0.05em] text-[11px] font-semibold"
+                  >
+                    <Globe2 className="w-4 h-4 text-[#D4AF37]" />
+                    The Voice of Global Mining
+                  </Badge>
+                </div>
+
+                {/* Prominent Editorial GSAP Headline */}
+                <h1
+                  ref={headlineRef}
+                  className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.06] tracking-[-0.015em] mb-4"
+                >
+                  <span className="inline-block gsap-word mr-3">Where</span>
+                  <span className="inline-block gsap-word mr-3">Mining</span>
+                  <span className="inline-block gsap-word mr-3">Companies</span>
+                  <span className="inline-block gsap-word mr-3">Get</span>
+                  <span className="inline-block gsap-word relative text-white">
+                    <span className="relative z-10">Discovered</span>
+                    <svg
+                      className="absolute -bottom-1.5 left-0 w-full h-3 text-[#D4AF37]"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M 0 14 Q 45 4, 100 12"
+                        stroke="currentColor"
+                        strokeWidth="4.5"
+                        fill="none"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                  .
+                </h1>
+
+                {/* Prominent Editorial GSAP Paragraph */}
+                <p
+                  ref={paragraphRef}
+                  className="font-sans text-base sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-xl font-normal"
+                >
+                  {bodyWords.map((word, idx) => (
+                    <span
+                      key={`${word}-${idx}`}
+                      className="inline-block gsap-body-word mr-[0.25em]"
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </p>
+
+                {/* Dual Action CTAs */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                  <Link href="#submit-news">
+                    <Button
+                      variant="gold"
+                      size="lg"
+                      fullWidth
+                      className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_25px_rgba(184,134,11,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] transition-all group cursor-pointer px-7 py-3.5 text-base"
+                    >
+                      Submit Your News
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+
+                  <Link href="#reach">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      fullWidth
+                      className="font-sans font-semibold tracking-wide border-white/30 text-white hover:border-white hover:bg-white/10 cursor-pointer px-7 py-3.5 text-base"
+                    >
+                      <TrendingUp className="w-4 h-4 mr-2 text-[#D4AF37]" />
+                      See Our Reach
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: Large WebGL Globe Visual (Fitted to Screen) */}
+              <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 -mt-4 sm:-mt-6 lg:-mt-8">
+                <div
+                  className="relative w-full flex justify-center lg:justify-end items-center animate-float-slow lg:translate-x-16 xl:translate-x-24 transition-transform duration-150 ease-out"
+                  style={{
+                    transform: `translate3d(${parallax.orbitX}px, ${parallax.orbitY}px, 0) rotateX(${parallax.tiltX}deg) rotateY(${parallax.tiltY}deg)`,
+                  }}
+                >
+                  <ConnectionArcs disabled={!enableConnectionArcs} />
+                  <OrbitTooltips disabled={!enableOrbitTooltips} />
+                  <div className="relative z-0">
+                    <Globe size={680} className="scale-95 sm:scale-100 lg:scale-105 xl:scale-110" />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      )}
+    </CursorParallax>
+  );
+};

@@ -1,0 +1,166 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Menu, X, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+
+const navLinks = [
+  { name: "About", href: "#about" },
+  { name: "Services", href: "#services" },
+  { name: "Companies", href: "#trusted-by" },
+  { name: "Submit News", href: "#submit-news" },
+  { name: "Contact", href: "#contact" },
+];
+
+export const Header: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 40) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 font-sans ${
+        isScrolled
+          ? "bg-[#0B1F3A]/95 backdrop-blur-md border-b border-white/10 shadow-lg py-2"
+          : "bg-transparent border-b border-transparent py-2.5"
+      }`}
+    >
+      {/* Full-width container */}
+      <div className="w-full px-6 sm:px-10 lg:px-16 flex items-center justify-between">
+        {/* Original Brand Logo Left */}
+        <Link
+          href="/"
+          className="group flex items-center focus:outline-none"
+          aria-label="Mining Discovery Home"
+        >
+          <Image
+            src="/logo.png"
+            alt="Mining Discovery Logo"
+            width={220}
+            height={85}
+            priority
+            className="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-102"
+          />
+        </Link>
+
+        {/* Desktop Navigation Links (Inter 600) */}
+        <nav className="hidden lg:flex items-center gap-8 font-sans">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              href={link.href}
+              className="text-xs font-semibold uppercase tracking-wider text-white/90 hover:text-[#D4AF37] transition-colors duration-300"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Desktop Action-Specific CTA Button */}
+        <div className="hidden lg:flex items-center">
+          <Button
+            variant="gold"
+            size="sm"
+            className="font-sans font-semibold tracking-wide shadow-[0_0_20px_rgba(184,134,11,0.35)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] transition-shadow text-xs py-1.5 px-4"
+          >
+            Submit News
+            <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+          </Button>
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          className="lg:hidden p-1.5 rounded-md focus:outline-none transition-colors text-white hover:bg-white/10"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-[#0B1F3A] text-white shadow-2xl p-6 flex flex-col justify-between transform transition-transform duration-300 ease-out border-l border-white/15 font-sans">
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between border-b border-white/15 pb-4 mb-6">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center"
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="Mining Discovery"
+                    width={160}
+                    height={60}
+                    className="h-8 w-auto object-contain"
+                  />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Mobile Nav Links */}
+              <nav className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-sm font-semibold uppercase tracking-wider text-white/90 hover:text-[#D4AF37] py-1 border-b border-white/10 transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Mobile CTA */}
+            <div className="pt-6 border-t border-white/15">
+              <Button
+                variant="gold"
+                size="md"
+                fullWidth
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-sans font-semibold tracking-wide shadow-md"
+              >
+                Submit News
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
