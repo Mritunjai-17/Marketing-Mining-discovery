@@ -281,10 +281,10 @@ export const Hero: React.FC<HeroProps> = ({
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Standardized WebGL Globe Visual */}
+              {/* RIGHT COLUMN: WebGL Globe Visual Shifted Right into Empty Space */}
               <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full">
                 <div
-                  className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow transition-transform duration-150 ease-out"
+                  className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow lg:translate-x-20 xl:translate-x-32 transition-transform duration-150 ease-out"
                   style={{
                     transform: `translate3d(${parallax.orbitX}px, ${parallax.orbitY}px, 0) rotateX(${parallax.tiltX}deg) rotateY(${parallax.tiltY}deg)`,
                   }}
