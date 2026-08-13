@@ -99,9 +99,9 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
             transform="rotate(-15 340 340)"
           />
 
-          {/* DECORATIVE ORBIT DOTS ON DASHED RING */}
-          <circle cx="70" cy="310" r="2.5" fill="#D4AF37" opacity="0.5" />
-          <circle cx="610" cy="370" r="2.5" fill="#D4AF37" opacity="0.5" />
+          {/* DECORATIVE ORBIT DOTS ON DASHED RING PATH (SMALL 4-5PX, LOW OPACITY, NO OVERSIZED CIRCLES) */}
+          <circle cx="70" cy="310" r="2" fill="#D4AF37" opacity="0.5" />
+          <circle cx="610" cy="370" r="2" fill="#D4AF37" opacity="0.5" />
           <circle cx="240" cy="225" r="2" fill="#FFFFFF" opacity="0.45" />
 
           {/* LINE TYPE 2: HUB CONNECTION ARCS */}
@@ -192,7 +192,7 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
           )}
         </svg>
 
-        {/* LABELED HUB MARKERS & FLOATING LOCATION TAGS */}
+        {/* LABELED HUB MARKERS & FLOATING LOCATION TAGS (STANDARDIZED SMALL ~8PX DOTS ALWAYS PAIRED WITH VISIBLE LABEL PILL) */}
         <div className="absolute inset-0 pointer-events-auto">
           {locationTags.map((tag) => {
             const isHovered = hoveredTag === tag.id;
@@ -210,7 +210,7 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
                 onMouseEnter={() => setHoveredTag(tag.id)}
                 onMouseLeave={() => setHoveredTag(null)}
               >
-                {/* Standardized Labeled Hub Dot Marker */}
+                {/* Standardized Labeled Hub Dot Marker (Small ~8px Dot) */}
                 <div className="relative flex items-center justify-center">
                   <div
                     className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-[0_0_8px_#D4AF37] transition-transform duration-300 ${
@@ -229,7 +229,7 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
                       : "border-[#D4AF37]/35 hover:border-[#D4AF37]/70"
                   }`}
                 >
-                  <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-white uppercase">
+                  <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-white uppercase font-sans">
                     {tag.name}
                   </span>
                 </div>

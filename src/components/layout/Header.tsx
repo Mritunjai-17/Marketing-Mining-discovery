@@ -40,7 +40,7 @@ export const Header: React.FC = () => {
       }`}
     >
       {/* Full-width container */}
-      <div className="w-full px-6 sm:px-10 lg:px-16 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-8 lg:px-16 flex items-center justify-between">
         {/* Original Brand Logo Left */}
         <Link
           href="/"
@@ -70,14 +70,14 @@ export const Header: React.FC = () => {
           ))}
         </nav>
 
-        {/* Desktop Action-Specific CTA Button */}
+        {/* Desktop Header Action CTA: Distinct "Get Featured" Partnership CTA */}
         <div className="hidden lg:flex items-center">
           <Button
             variant="gold"
             size="sm"
-            className="font-sans font-semibold tracking-wide shadow-[0_0_20px_rgba(184,134,11,0.35)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] transition-shadow text-xs py-1.5 px-4"
+            className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_20px_rgba(184,134,11,0.35)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] transition-shadow text-xs py-1.5 px-4"
           >
-            Submit News
+            Get Featured
             <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
           </Button>
         </div>
@@ -152,9 +152,9 @@ export const Header: React.FC = () => {
                 size="md"
                 fullWidth
                 onClick={() => setMobileMenuOpen(false)}
-                className="font-sans font-semibold tracking-wide shadow-md"
+                className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-md"
               >
-                Submit News
+                Get Featured
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>

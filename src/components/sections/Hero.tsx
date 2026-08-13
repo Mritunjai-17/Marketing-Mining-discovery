@@ -10,9 +10,7 @@ import { Globe } from "@/components/ui/Globe";
 import {
   CursorParallax,
   MineralDustField,
-  SeismicSweep,
   GlowPulse,
-  OrbitTooltips,
   StarfieldBackground,
   ConnectionArcs,
   ParallaxState,
@@ -26,12 +24,8 @@ export interface HeroProps {
   enableParallax?: boolean;
   /** Layer 2: Ambient Gold/White Mineral Dust Field Canvas */
   enableMineralDust?: boolean;
-  /** Layer 3: Seismic Scan Sweep Radar Line */
-  enableSeismicSweep?: boolean;
   /** Layer 4: Ambient Gold Glow Breathing Pulse */
   enableGlowPulse?: boolean;
-  /** Layer 5: Interactive Orbit Ring Marker Tooltips */
-  enableOrbitTooltips?: boolean;
   /** Layer A: Starfield Depth Canvas Background */
   enableStarfield?: boolean;
   /** Layer B & C: Animated Connection Arcs & Floating Location Tags */
@@ -45,9 +39,7 @@ export const Hero: React.FC<HeroProps> = ({
   bgVariant = "navy-topo",
   enableParallax = true,
   enableMineralDust = true,
-  enableSeismicSweep = true,
   enableGlowPulse = true,
-  enableOrbitTooltips = true,
   enableStarfield = true,
   enableConnectionArcs = true,
 }) => {
@@ -146,15 +138,15 @@ export const Hero: React.FC<HeroProps> = ({
       {(parallax: ParallaxState) => (
         <section
           ref={sectionRef}
-          className="relative bg-[#0B1220] text-white pt-16 pb-8 sm:pt-20 sm:pb-10 lg:pt-20 lg:pb-12 border-b border-white/10 overflow-hidden font-sans"
+          className="relative bg-[#0B1220] text-white pt-16 pb-10 sm:pt-20 sm:pb-12 lg:pt-20 lg:pb-14 overflow-hidden font-sans"
         >
           {/* LAYER A: STARFIELD DEPTH BACKGROUND CANVAS */}
           <StarfieldBackground disabled={!enableStarfield} />
 
-          {/* BASE BACKGROUND GRADIENT */}
+          {/* CLEAN BASE BACKGROUND GRADIENT (NO OBSTRUCTING SHAPE ARTIFACTS) */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#0B1F3A] to-[#061224] -z-20" />
 
-          {/* LAYER 4: AMBIENT GOLD GLOW PULSE WITH CURSOR PARALLAX */}
+          {/* AMBIENT GOLD GLOW PULSE WITH CURSOR PARALLAX */}
           <div
             style={{
               transform: `translate3d(${parallax.glowX}px, ${parallax.glowY}px, 0)`,
@@ -164,16 +156,13 @@ export const Hero: React.FC<HeroProps> = ({
             <GlowPulse disabled={!enableGlowPulse} />
           </div>
 
-          {/* LAYER 2: MINERAL DUST PARTICLE CANVAS FIELD */}
+          {/* MINERAL DUST PARTICLE CANVAS FIELD */}
           <MineralDustField disabled={!enableMineralDust} />
-
-          {/* LAYER 3: SEISMIC RADAR SCAN SWEEP */}
-          <SeismicSweep disabled={!enableSeismicSweep} />
 
           {/* GEOLOGICAL CONTOUR LINES WITH PARALLAX */}
           {bgVariant === "navy-topo" && (
             <div
-              className="absolute inset-0 -z-10 pointer-events-none opacity-[0.07] overflow-hidden transition-transform duration-100 ease-out"
+              className="absolute inset-0 -z-10 pointer-events-none opacity-[0.05] overflow-hidden transition-transform duration-100 ease-out"
               style={{
                 transform: `translate3d(${parallax.glowX * 0.5}px, ${parallax.glowY * 0.5}px, 0)`,
               }}
@@ -194,23 +183,8 @@ export const Hero: React.FC<HeroProps> = ({
                   stroke="#FFFFFF"
                   strokeWidth="1.5"
                 />
-                <path
-                  d="M1200,400 C1000,420 850,350 600,480 C350,610 150,750 0,900"
-                  stroke="#D4AF37"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M1200,550 C1050,560 900,500 700,620 C500,740 250,850 0,950"
-                  stroke="#FFFFFF"
-                  strokeWidth="1"
-                />
               </svg>
             </div>
-          )}
-
-          {/* DARKENED BLURRED OPTION B */}
-          {bgVariant === "dark-blur" && (
-            <div className="absolute inset-0 -z-10 pointer-events-none bg-black/75 backdrop-blur-3xl" />
           )}
 
           {/* SUBTLE NOISE GRAIN OVERLAY */}
@@ -220,7 +194,7 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 max-w-[1440px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
               
-              {/* LEFT COLUMN: Editorial Copy & CTAs */}
+              {/* LEFT COLUMN: Clean Editorial Copy & CTAs */}
               <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-1">
                 
                 {/* Eyebrow Badge */}
@@ -235,7 +209,7 @@ export const Hero: React.FC<HeroProps> = ({
                   </Badge>
                 </div>
 
-                {/* Prominent Editorial GSAP Headline */}
+                {/* Prominent Editorial GSAP Headline (Unobstructed Background) */}
                 <h1
                   ref={headlineRef}
                   className="font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.08] sm:leading-[1.06] tracking-[-0.015em] mb-4"
@@ -279,7 +253,7 @@ export const Hero: React.FC<HeroProps> = ({
                   ))}
                 </p>
 
-                {/* Dual Action CTAs */}
+                {/* Dual Action CTAs (Primary conversion: "Submit Your News") */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
                   <Link href="#submit-news" className="w-full sm:w-auto">
                     <Button
@@ -307,7 +281,7 @@ export const Hero: React.FC<HeroProps> = ({
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: WebGL Globe Visual (Fully Responsive Container) */}
+              {/* RIGHT COLUMN: Standardized WebGL Globe Visual */}
               <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full">
                 <div
                   className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow transition-transform duration-150 ease-out"
@@ -316,7 +290,6 @@ export const Hero: React.FC<HeroProps> = ({
                   }}
                 >
                   <ConnectionArcs disabled={!enableConnectionArcs} />
-                  <OrbitTooltips disabled={!enableOrbitTooltips} />
                   <div className="relative z-0 w-full h-full flex items-center justify-center">
                     <Globe size={680} className="w-full h-full" />
                   </div>
@@ -325,6 +298,9 @@ export const Hero: React.FC<HeroProps> = ({
 
             </div>
           </div>
+
+          {/* ELEGANT INTENTIONAL HERO BOTTOM GRADIENT BOUNDARY (SMOOTH TRANSITION TO NEXT SECTION) */}
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-[#0B1220] pointer-events-none z-20" />
         </section>
       )}
     </CursorParallax>

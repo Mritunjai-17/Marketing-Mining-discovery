@@ -17,13 +17,13 @@ export interface MiningHub {
   hexColor: string;
 }
 
-// Mining Hubs
+// Mining Hubs (Small standardized marker size)
 export const miningHubs: MiningHub[] = [
   {
     name: "Perth, Australia",
     commodity: "Gold & Iron Ore",
     location: [-31.95, 115.86],
-    size: 0.15,
+    size: 0.04,
     color: [0.85, 0.65, 0.12], // Gold
     hexColor: "#D4AF37",
   },
@@ -31,7 +31,7 @@ export const miningHubs: MiningHub[] = [
     name: "Santiago, Chile",
     commodity: "Copper & Lithium",
     location: [-33.45, -70.66],
-    size: 0.15,
+    size: 0.04,
     color: [0.92, 0.92, 0.92], // Light Gray / White
     hexColor: "#E5E5E3",
   },
@@ -39,7 +39,7 @@ export const miningHubs: MiningHub[] = [
     name: "Toronto, Canada",
     commodity: "Mining Capital & Gold",
     location: [43.65, -79.38],
-    size: 0.15,
+    size: 0.04,
     color: [0.85, 0.65, 0.12], // Gold
     hexColor: "#D4AF37",
   },
@@ -47,7 +47,7 @@ export const miningHubs: MiningHub[] = [
     name: "Johannesburg, SA",
     commodity: "Platinum & Diamonds",
     location: [-26.20, 28.04],
-    size: 0.15,
+    size: 0.04,
     color: [0.92, 0.92, 0.92], // Light Gray / White
     hexColor: "#E5E5E3",
   },
@@ -55,7 +55,7 @@ export const miningHubs: MiningHub[] = [
     name: "Nevada, USA",
     commodity: "Gold & Lithium",
     location: [40.5, -116.5],
-    size: 0.15,
+    size: 0.04,
     color: [0.85, 0.65, 0.12], // Gold
     hexColor: "#D4AF37",
   },
@@ -63,7 +63,7 @@ export const miningHubs: MiningHub[] = [
     name: "Lima, Peru",
     commodity: "Silver & Zinc",
     location: [-12.04, -77.04],
-    size: 0.15,
+    size: 0.04,
     color: [0.92, 0.92, 0.92], // Light Gray / White
     hexColor: "#E5E5E3",
   },
