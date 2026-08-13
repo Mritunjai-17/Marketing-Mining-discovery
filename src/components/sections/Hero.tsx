@@ -146,7 +146,7 @@ export const Hero: React.FC<HeroProps> = ({
       {(parallax: ParallaxState) => (
         <section
           ref={sectionRef}
-          className="relative bg-[#0B1220] text-white pt-14 pb-6 sm:pt-16 sm:pb-8 lg:pt-16 lg:pb-8 border-b border-white/10 overflow-hidden font-sans"
+          className="relative bg-[#0B1220] text-white pt-16 pb-8 sm:pt-20 sm:pb-10 lg:pt-20 lg:pb-12 border-b border-white/10 overflow-hidden font-sans"
         >
           {/* LAYER A: STARFIELD DEPTH BACKGROUND CANVAS */}
           <StarfieldBackground disabled={!enableStarfield} />
@@ -217,11 +217,11 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="absolute inset-0 -z-10 opacity-[0.025] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
 
           {/* MAIN VIEWPORT LAYOUT CONTAINER */}
-          <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16 max-w-[1440px] mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
               
               {/* LEFT COLUMN: Editorial Copy & CTAs */}
-              <div className="lg:col-span-6 flex flex-col items-start z-20 lg:pr-2 pt-1">
+              <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-1">
                 
                 {/* Eyebrow Badge */}
                 <div className="mb-3.5">
@@ -238,12 +238,12 @@ export const Hero: React.FC<HeroProps> = ({
                 {/* Prominent Editorial GSAP Headline */}
                 <h1
                   ref={headlineRef}
-                  className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.06] tracking-[-0.015em] mb-4"
+                  className="font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.08] sm:leading-[1.06] tracking-[-0.015em] mb-4"
                 >
-                  <span className="inline-block gsap-word mr-3">Where</span>
-                  <span className="inline-block gsap-word mr-3">Mining</span>
-                  <span className="inline-block gsap-word mr-3">Companies</span>
-                  <span className="inline-block gsap-word mr-3">Get</span>
+                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Where</span>
+                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Mining</span>
+                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Companies</span>
+                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Get</span>
                   <span className="inline-block gsap-word relative text-white">
                     <span className="relative z-10">Discovered</span>
                     <svg
@@ -267,7 +267,7 @@ export const Hero: React.FC<HeroProps> = ({
                 {/* Prominent Editorial GSAP Paragraph */}
                 <p
                   ref={paragraphRef}
-                  className="font-sans text-base sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-xl font-normal"
+                  className="font-sans text-sm sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-lg lg:max-w-xl font-normal"
                 >
                   {bodyWords.map((word, idx) => (
                     <span
@@ -280,25 +280,25 @@ export const Hero: React.FC<HeroProps> = ({
                 </p>
 
                 {/* Dual Action CTAs */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-                  <Link href="#submit-news">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
+                  <Link href="#submit-news" className="w-full sm:w-auto">
                     <Button
                       variant="gold"
                       size="lg"
                       fullWidth
-                      className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_25px_rgba(184,134,11,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] transition-all group cursor-pointer px-7 py-3.5 text-base"
+                      className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_25px_rgba(184,134,11,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] transition-all group cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
                     >
                       Submit Your News
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
 
-                  <Link href="#reach">
+                  <Link href="#reach" className="w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="lg"
                       fullWidth
-                      className="font-sans font-semibold tracking-wide border-white/30 text-white hover:border-white hover:bg-white/10 cursor-pointer px-7 py-3.5 text-base"
+                      className="font-sans font-semibold tracking-wide border-white/30 text-white hover:border-white hover:bg-white/10 cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
                     >
                       <TrendingUp className="w-4 h-4 mr-2 text-[#D4AF37]" />
                       See Our Reach
@@ -307,18 +307,18 @@ export const Hero: React.FC<HeroProps> = ({
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Large WebGL Globe Visual (Fitted to Screen) */}
-              <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 -mt-4 sm:-mt-6 lg:-mt-8">
+              {/* RIGHT COLUMN: WebGL Globe Visual (Fully Responsive Container) */}
+              <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full">
                 <div
-                  className="relative w-full flex justify-center lg:justify-end items-center animate-float-slow lg:translate-x-16 xl:translate-x-24 transition-transform duration-150 ease-out"
+                  className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow transition-transform duration-150 ease-out"
                   style={{
                     transform: `translate3d(${parallax.orbitX}px, ${parallax.orbitY}px, 0) rotateX(${parallax.tiltX}deg) rotateY(${parallax.tiltY}deg)`,
                   }}
                 >
                   <ConnectionArcs disabled={!enableConnectionArcs} />
                   <OrbitTooltips disabled={!enableOrbitTooltips} />
-                  <div className="relative z-0">
-                    <Globe size={680} className="scale-95 sm:scale-100 lg:scale-105 xl:scale-110" />
+                  <div className="relative z-0 w-full h-full flex items-center justify-center">
+                    <Globe size={680} className="w-full h-full" />
                   </div>
                 </div>
               </div>

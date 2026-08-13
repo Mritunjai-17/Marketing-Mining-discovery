@@ -77,6 +77,7 @@ const tradeArcs = [
 
 export const Globe: React.FC<GlobeProps> = ({ className = "", size = 580 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const pointerInteracting = useRef<{ x: number; y: number } | null>(null);
   const pointerInteractionMovement = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const phiRef = useRef(0);
@@ -178,13 +179,14 @@ export const Globe: React.FC<GlobeProps> = ({ className = "", size = 580 }) => {
   };
 
   return (
-    <div className={`relative flex flex-col items-center select-none ${className}`}>
+    <div className={`relative flex flex-col items-center select-none w-full max-w-[680px] aspect-square ${className}`}>
       {/* Soft Outer Ambient Gold Glow */}
       <div className="absolute inset-0 rounded-full pointer-events-none transition-all duration-300 blur-3xl opacity-30 bg-radial from-[#D4AF37]/40 via-[#B8860B]/20 to-transparent -z-10" />
 
-      {/* Globe WebGL Canvas Container */}
+      {/* Responsive Globe WebGL Canvas Container */}
       <div
-        className="relative flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
+        ref={containerRef}
+        className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing touch-none aspect-square"
         onPointerDown={(e) => {
           pointerInteracting.current = {
             x: e.clientX,
@@ -218,12 +220,8 @@ export const Globe: React.FC<GlobeProps> = ({ className = "", size = 580 }) => {
       >
         <canvas
           ref={canvasRef}
-          className="w-full h-full max-w-[600px] max-h-[600px] aspect-square transition-opacity duration-700 filter drop-shadow-xl"
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            contain: "layout paint size",
-          }}
+          className="w-full h-full aspect-square transition-opacity duration-700 filter drop-shadow-xl object-contain"
+          style={{ contain: "layout paint size" }}
         />
       </div>
     </div>

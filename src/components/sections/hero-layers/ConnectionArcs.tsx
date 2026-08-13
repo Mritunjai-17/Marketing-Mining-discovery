@@ -64,7 +64,7 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
     <div
       className={`absolute inset-0 pointer-events-none z-10 flex items-center justify-center ${className}`}
     >
-      <div className="relative w-[680px] h-[680px]">
+      <div className="relative w-full max-w-[680px] aspect-square">
         {/* LINE TYPE 1 & 2: Dashed Orbit Ring + Hub-to-Hub Connection Arcs */}
         <svg
           className="w-full h-full overflow-visible"
@@ -213,23 +213,23 @@ export const ConnectionArcs: React.FC<ConnectionArcsProps> = ({
                 {/* Standardized Labeled Hub Dot Marker */}
                 <div className="relative flex items-center justify-center">
                   <div
-                    className={`w-2.5 h-2.5 rounded-full shadow-[0_0_8px_#D4AF37] transition-transform duration-300 ${
+                    className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-[0_0_8px_#D4AF37] transition-transform duration-300 ${
                       isHovered ? "scale-125" : ""
                     }`}
                     style={{ backgroundColor: tag.color }}
                   />
-                  <div className="absolute w-5 h-5 rounded-full border border-[#D4AF37]/40 animate-ping opacity-40 pointer-events-none" />
+                  <div className="absolute w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-[#D4AF37]/40 animate-ping opacity-40 pointer-events-none" />
                 </div>
 
                 {/* Location Label Pill */}
                 <div
-                  className={`absolute left-1/2 -translate-x-1/2 top-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0B1F3A]/95 border shadow-md backdrop-blur-md transition-all duration-300 whitespace-nowrap ${
+                  className={`absolute left-1/2 -translate-x-1/2 top-3 sm:top-4 flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-[#0B1F3A]/95 border shadow-md backdrop-blur-md transition-all duration-300 whitespace-nowrap ${
                     isHovered
                       ? "border-[#D4AF37] bg-[#0B1F3A] shadow-[0_0_14px_rgba(212,175,55,0.4)] scale-105"
                       : "border-[#D4AF37]/35 hover:border-[#D4AF37]/70"
                   }`}
                 >
-                  <span className="text-[10px] font-bold tracking-wider text-white uppercase">
+                  <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-white uppercase">
                     {tag.name}
                   </span>
                 </div>
