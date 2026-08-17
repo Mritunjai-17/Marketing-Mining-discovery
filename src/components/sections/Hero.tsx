@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Globe } from "@/components/ui/Globe";
@@ -15,6 +14,7 @@ import {
   ConnectionArcs,
   ParallaxState,
 } from "./hero-layers";
+import { motion, MotionStyle } from "framer-motion";
 import { ArrowRight, TrendingUp, Globe2 } from "lucide-react";
 
 export interface HeroProps {
@@ -30,6 +30,10 @@ export interface HeroProps {
   enableStarfield?: boolean;
   /** Layer B & C: Animated Connection Arcs & Floating Location Tags */
   enableConnectionArcs?: boolean;
+  /** Framer Motion Scroll Styles passed from ScrollHeroTransition */
+  heroStyle?: MotionStyle;
+  buttonsStyle?: MotionStyle;
+  globeStyle?: MotionStyle;
 }
 
 const bodyText =
@@ -42,14 +46,15 @@ export const Hero: React.FC<HeroProps> = ({
   enableGlowPulse = true,
   enableStarfield = true,
   enableConnectionArcs = true,
+  heroStyle,
+  buttonsStyle,
+  globeStyle,
 }) => {
   const headlineRef = useRef<HTMLHeadingElement | null>(null);
   const paragraphRef = useRef<HTMLParagraphElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -95,36 +100,6 @@ export const Hero: React.FC<HeroProps> = ({
             "-=0.5"
           );
         }
-
-        gsap.to(headlineWords, {
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "bottom 20%",
-            scrub: 0.5,
-            invalidateOnRefresh: true,
-          },
-          y: -40,
-          opacity: 0.2,
-          stagger: 0.02,
-          ease: "none",
-        });
-
-        if (paragraphWords && paragraphWords.length > 0) {
-          gsap.to(paragraphWords, {
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              end: "bottom 20%",
-              scrub: 0.5,
-              invalidateOnRefresh: true,
-            },
-            y: -30,
-            opacity: 0.2,
-            stagger: 0.01,
-            ease: "none",
-          });
-        }
       }
     }, sectionRef);
 
@@ -138,7 +113,7 @@ export const Hero: React.FC<HeroProps> = ({
       {(parallax: ParallaxState) => (
         <section
           ref={sectionRef}
-          className="relative bg-[#0B1220] text-white pt-16 pb-10 sm:pt-20 sm:pb-12 lg:pt-20 lg:pb-14 overflow-hidden font-sans"
+          className="relative bg-[#0B1220] text-white pt-24 pb-10 sm:pt-28 sm:pb-12 lg:pt-32 lg:pb-14 overflow-hidden font-sans w-full min-h-screen flex flex-col justify-center"
         >
           {/* LAYER A: STARFIELD DEPTH BACKGROUND CANVAS */}
           <StarfieldBackground disabled={!enableStarfield} />
@@ -192,97 +167,105 @@ export const Hero: React.FC<HeroProps> = ({
 
           {/* MAIN VIEWPORT LAYOUT CONTAINER */}
           <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 max-w-[1440px] mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
               
-              {/* LEFT COLUMN: Clean Editorial Copy & CTAs */}
+              {/* LEFT COLUMN: Editorial Copy & CTAs */}
               <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-1">
                 
-                {/* Eyebrow Badge */}
-                <div className="mb-3.5">
-                  <Badge
-                    variant="gold"
-                    size="md"
-                    className="gap-2 shadow-sm bg-[#B8860B]/20 text-[#D4AF37] border border-[#B8860B]/40 px-3.5 py-1.5 font-sans uppercase tracking-[0.05em] text-[11px] font-semibold"
-                  >
-                    <Globe2 className="w-4 h-4 text-[#D4AF37]" />
-                    The Voice of Global Mining
-                  </Badge>
-                </div>
-
-                {/* Prominent Editorial GSAP Headline (Unobstructed Background) */}
-                <h1
-                  ref={headlineRef}
-                  className="font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.08] sm:leading-[1.06] tracking-[-0.015em] mb-4"
-                >
-                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Where</span>
-                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Mining</span>
-                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Companies</span>
-                  <span className="inline-block gsap-word mr-2.5 sm:mr-3">Get</span>
-                  <span className="inline-block gsap-word relative text-white">
-                    <span className="relative z-10">Discovered</span>
-                    <svg
-                      className="absolute -bottom-1.5 left-0 w-full h-3 text-[#D4AF37]"
-                      viewBox="0 0 100 20"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M 0 14 Q 45 4, 100 12"
-                        stroke="currentColor"
-                        strokeWidth="4.5"
-                        fill="none"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </span>
-                  .
-                </h1>
-
-                {/* Prominent Editorial GSAP Paragraph */}
-                <p
-                  ref={paragraphRef}
-                  className="font-sans text-sm sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-lg lg:max-w-xl font-normal"
-                >
-                  {bodyWords.map((word, idx) => (
-                    <span
-                      key={`${word}-${idx}`}
-                      className="inline-block gsap-body-word mr-[0.25em]"
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </p>
-
-                {/* Dual Action CTAs (Primary conversion: "Submit Your News") */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
-                  <Link href="#submit-news" className="w-full sm:w-auto">
-                    <Button
+                {/* Headline & Subheadline Motion Wrapper */}
+                <motion.div style={heroStyle} className="flex flex-col items-start w-full">
+                  {/* Eyebrow Badge */}
+                  <div className="mb-3.5">
+                    <Badge
                       variant="gold"
-                      size="lg"
-                      fullWidth
-                      className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_25px_rgba(184,134,11,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] transition-all group cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
+                      size="sm"
+                      className="gap-2 shadow-sm bg-[#B8860B]/20 text-[#D4AF37] border border-[#B8860B]/40 px-3.5 py-1.5 font-sans uppercase tracking-[0.05em] text-[11px] font-semibold"
                     >
-                      Submit Your News
-                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </Link>
+                      <Globe2 className="w-4 h-4 text-[#D4AF37]" />
+                      The Voice of Global Mining
+                    </Badge>
+                  </div>
 
-                  <Link href="#reach" className="w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      fullWidth
-                      className="font-sans font-semibold tracking-wide border-white/30 text-white hover:border-white hover:bg-white/10 cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
-                    >
-                      <TrendingUp className="w-4 h-4 mr-2 text-[#D4AF37]" />
-                      See Our Reach
-                    </Button>
-                  </Link>
-                </div>
+                  {/* GSAP Animated Headline */}
+                  <h1
+                    ref={headlineRef}
+                    className="font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-[62px] font-normal text-white leading-[1.08] sm:leading-[1.06] tracking-[-0.015em] mb-4"
+                  >
+                    <span className="inline-block gsap-word mr-2.5 sm:mr-3">Where</span>
+                    <span className="inline-block gsap-word mr-2.5 sm:mr-3">Mining</span>
+                    <span className="inline-block gsap-word mr-2.5 sm:mr-3">Companies</span>
+                    <span className="inline-block gsap-word mr-2.5 sm:mr-3">Get</span>
+                    <span className="inline-block gsap-word relative text-white">
+                      <span className="relative z-10">Discovered</span>
+                      <svg
+                        className="absolute -bottom-1.5 left-0 w-full h-3 text-[#D4AF37]"
+                        viewBox="0 0 100 20"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M 0 14 Q 45 4, 100 12"
+                          stroke="currentColor"
+                          strokeWidth="4.5"
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    .
+                  </h1>
+
+                  {/* Subheadline Paragraph */}
+                  <p
+                    ref={paragraphRef}
+                    className="font-sans text-sm sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-lg lg:max-w-xl font-normal"
+                  >
+                    {bodyWords.map((word, idx) => (
+                      <span
+                        key={`${word}-${idx}`}
+                        className="inline-block gsap-body-word mr-[0.25em]"
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </p>
+                </motion.div>
+
+                {/* Dual Action CTAs Motion Wrapper */}
+                <motion.div style={buttonsStyle} className="w-full">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
+                    <Link href="#submit-news" className="w-full sm:w-auto">
+                      <Button
+                        variant="gold"
+                        size="lg"
+                        fullWidth
+                        className="font-sans font-semibold tracking-wide text-[#0B1F3A] bg-[#B8860B] hover:bg-[#D4AF37] shadow-[0_0_25px_rgba(184,134,11,0.35)] hover:shadow-[0_0_35px_rgba(212,175,55,0.5)] transition-all group cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
+                      >
+                        Submit Your News
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+
+                    <Link href="#reach" className="w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        fullWidth
+                        className="font-sans font-semibold tracking-wide border-white/30 text-white hover:border-white hover:bg-white/10 cursor-pointer px-6 sm:px-7 py-3 sm:py-3.5 text-sm sm:text-base justify-center"
+                      >
+                        <TrendingUp className="w-4 h-4 mr-2 text-[#D4AF37]" />
+                        See Our Reach
+                      </Button>
+                    </Link>
+                  </div>
+                </motion.div>
               </div>
 
-              {/* RIGHT COLUMN: WebGL Globe Visual Shifted Right into Empty Space */}
-              <div className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full">
+              {/* RIGHT COLUMN: WebGL Globe Visual Motion Wrapper */}
+              <motion.div
+                style={globeStyle}
+                className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full"
+              >
                 <div
                   className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow lg:translate-x-20 xl:translate-x-32 transition-transform duration-150 ease-out"
                   style={{
@@ -294,12 +277,12 @@ export const Hero: React.FC<HeroProps> = ({
                     <Globe size={680} className="w-full h-full" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
           </div>
 
-          {/* ELEGANT INTENTIONAL HERO BOTTOM GRADIENT BOUNDARY (SMOOTH TRANSITION TO NEXT SECTION) */}
+          {/* ELEGANT INTENTIONAL HERO BOTTOM GRADIENT BOUNDARY */}
           <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-[#0B1220] pointer-events-none z-20" />
         </section>
       )}

@@ -1,12 +1,16 @@
-import { Hero, Stats, TrustedBy, Services } from "@/components/sections";
+"use client";
+
+import { Hero, Stats, TrustedBy, ServicesScrollStory, ScrollHeroTransition } from "@/components/sections";
 
 export default function Home() {
   return (
     <div>
-      <Hero />
-      <Stats />
+      <ScrollHeroTransition
+        renderHero={(motionStyles) => <Hero {...motionStyles} />}
+        nextSection={<Stats />}
+      />
       <TrustedBy />
-      <Services />
+      <ServicesScrollStory />
     </div>
   );
 }
