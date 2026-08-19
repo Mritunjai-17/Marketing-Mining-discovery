@@ -310,7 +310,7 @@ export const ServicesScrollStory: React.FC = () => {
     <section id="services" ref={containerRef} className="relative h-[500vh] bg-[#0B1220] text-[#F5F1E8] font-sans border-b border-[#C89216]/20">
       {/* STICKY VIEWPORT CONTAINER */}
       <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
-        
+
         {/* =========================================================================
             STAGE 01: STAKE THE CLAIM (Geological Survey Rig Photography)
            ========================================================================= */}

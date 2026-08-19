@@ -113,7 +113,7 @@ export const Hero: React.FC<HeroProps> = ({
       {(parallax: ParallaxState) => (
         <section
           ref={sectionRef}
-          className="relative bg-[#0B1220] text-white pt-24 pb-10 sm:pt-28 sm:pb-12 lg:pt-32 lg:pb-14 overflow-hidden font-sans w-full min-h-screen flex flex-col justify-center"
+          className="relative bg-[#0B1220] text-white pt-24 pb-16 sm:pt-28 sm:pb-18 lg:pt-32 lg:pb-20 overflow-hidden font-sans w-full min-h-screen flex flex-col justify-center"
         >
           {/* LAYER A: STARFIELD DEPTH BACKGROUND CANVAS */}
           <StarfieldBackground disabled={!enableStarfield} />
@@ -166,8 +166,8 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="absolute inset-0 -z-10 opacity-[0.025] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
 
           {/* MAIN VIEWPORT LAYOUT CONTAINER */}
-          <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 max-w-[1440px] mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="relative z-10 w-full px-4 sm:px-8 lg:px-12 xl:px-16 max-w-[1440px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-10 items-center">
               
               {/* LEFT COLUMN: Editorial Copy & CTAs */}
               <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-1">
@@ -215,10 +215,10 @@ export const Hero: React.FC<HeroProps> = ({
                     .
                   </h1>
 
-                  {/* Subheadline Paragraph */}
+                  {/* Subheadline Paragraph — mb-8 (+8px breathing room to CTAs) */}
                   <p
                     ref={paragraphRef}
-                    className="font-sans text-sm sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-6 max-w-lg lg:max-w-xl font-normal"
+                    className="font-sans text-sm sm:text-lg lg:text-xl text-[#E5E5E3]/95 leading-relaxed mb-8 max-w-lg lg:max-w-xl font-normal"
                   >
                     {bodyWords.map((word, idx) => (
                       <span
@@ -233,8 +233,8 @@ export const Hero: React.FC<HeroProps> = ({
 
                 {/* Dual Action CTAs Motion Wrapper */}
                 <motion.div style={buttonsStyle} className="w-full">
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
-                    <Link href="#submit-news" className="w-full sm:w-auto">
+                  <div className="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-3.5 sm:gap-4 w-full min-[420px]:w-auto">
+                    <Link href="#submit-news" className="w-full min-[420px]:w-auto">
                       <Button
                         variant="gold"
                         size="lg"
@@ -246,7 +246,7 @@ export const Hero: React.FC<HeroProps> = ({
                       </Button>
                     </Link>
 
-                    <Link href="#reach" className="w-full sm:w-auto">
+                    <Link href="#reach" className="w-full min-[420px]:w-auto">
                       <Button
                         variant="outline"
                         size="lg"
@@ -261,20 +261,22 @@ export const Hero: React.FC<HeroProps> = ({
                 </motion.div>
               </div>
 
-              {/* RIGHT COLUMN: WebGL Globe Visual Motion Wrapper */}
+              {/* RIGHT COLUMN: WebGL Globe Visual Motion Wrapper — Measured Gap Reduction (lg:translate-x-6 xl:translate-x-10) */}
               <motion.div
                 style={globeStyle}
-                className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-6 w-full"
+                className="lg:col-span-6 relative flex flex-col items-center lg:items-end justify-center z-10 mt-2 sm:mt-4 lg:-mt-4 w-full"
               >
-                <div
-                  className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[680px] aspect-square flex justify-center items-center animate-float-slow lg:translate-x-20 xl:translate-x-32 transition-transform duration-150 ease-out"
-                  style={{
-                    transform: `translate3d(${parallax.orbitX}px, ${parallax.orbitY}px, 0) rotateX(${parallax.tiltX}deg) rotateY(${parallax.tiltY}deg)`,
-                  }}
-                >
-                  <ConnectionArcs disabled={!enableConnectionArcs} />
-                  <div className="relative z-0 w-full h-full flex items-center justify-center">
-                    <Globe size={680} className="w-full h-full" />
+                <div className="relative w-full max-w-[340px] sm:max-w-[480px] lg:max-w-[650px] xl:max-w-[680px] aspect-square flex justify-center items-center lg:translate-x-6 xl:translate-x-10">
+                  <div
+                    className="relative w-full h-full flex items-center justify-center"
+                    style={{
+                      transform: `translate3d(${parallax.orbitX}px, ${parallax.orbitY}px, 0) rotateX(${parallax.tiltX}deg) rotateY(${parallax.tiltY}deg)`,
+                    }}
+                  >
+                    <ConnectionArcs disabled={!enableConnectionArcs} />
+                    <div className="relative z-0 w-full h-full flex items-center justify-center">
+                      <Globe size={680} className="w-full h-full" />
+                    </div>
                   </div>
                 </div>
               </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { motion, useScroll, useTransform, MotionStyle } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, MotionStyle } from "framer-motion";
 
 export interface HeroMotionStyles {
   heroStyle?: MotionStyle;
@@ -38,33 +38,40 @@ export const ScrollHeroTransition: React.FC<ScrollHeroTransitionProps> = ({
     offset: ["start start", "end end"],
   });
 
-  // DETERMINISTIC ONE-WAY SCROLL PROGRESSION (0.0 -> 1.0)
-  // Stage 1: Hero text & CTAs move up and fade out (0.00 -> 0.35)
-  const heroY = useTransform(scrollYProgress, [0, 0.35], ["0%", "-80%"]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
+  // Physics spring for silky-smooth scroll progress without abrupt steps or lag
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 24,
+    restDelta: 0.001,
+  });
 
-  const buttonsY = useTransform(scrollYProgress, [0, 0.30], ["0%", "-60%"]);
-  const buttonsOpacity = useTransform(scrollYProgress, [0, 0.30], [1, 0]);
+  // Stage 1: Headline editorial text & CTAs exit upward (0.00 -> 0.40)
+  const heroY = useTransform(smoothProgress, [0, 0.40], ["0%", "-50%"]);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.35], [1, 0]);
 
-  // Stage 2: Globe scales up, rotates, and fades to 0 (0.20 -> 0.60)
-  const globeScale = useTransform(scrollYProgress, [0, 0.60], [1, 1.35]);
-  const globeX = useTransform(scrollYProgress, [0, 0.60], ["0%", "5%"]);
-  const globeRotate = useTransform(scrollYProgress, [0, 1.00], [0, 30]);
-  const globeOpacity = useTransform(scrollYProgress, [0.20, 0.60], [1, 0]);
+  const buttonsY = useTransform(smoothProgress, [0, 0.35], ["0%", "-40%"]);
+  const buttonsOpacity = useTransform(smoothProgress, [0, 0.30], [1, 0]);
 
-  // Stage 3: Master hero dark background opacity fades out (0.40 -> 0.70)
-  const masterHeroOpacity = useTransform(scrollYProgress, [0.40, 0.70], [1, 0]);
+  // Stage 2: Globe continuous transform & elegant handoff (0.00 -> 0.75)
+  const globeScale = useTransform(smoothProgress, [0, 0.70], [1, 1.25]);
+  const globeX = useTransform(smoothProgress, [0, 0.70], ["0%", "4%"]);
+  const globeRotate = useTransform(smoothProgress, [0, 1.00], [0, 30]);
+  const globeOpacity = useTransform(smoothProgress, [0.35, 0.75], [1, 0]);
 
-  // Hard pointer-events and visibility cutoff once HERO_COMPLETE is reached (progress >= 0.75 / 0.85)
-  const pointerEvents = useTransform(scrollYProgress, (progress) =>
-    progress >= 0.75 ? "none" : "auto"
+  // Stage 3: Master hero dark container opacity transition (0.45 -> 0.80)
+  const masterHeroOpacity = useTransform(smoothProgress, [0.45, 0.80], [1, 0]);
+
+  // Hard pointer-events and visibility cutoff once HERO_COMPLETE is reached (progress >= 0.80 / 0.90)
+  const pointerEvents = useTransform(smoothProgress, (progress) =>
+    progress >= 0.80 ? "none" : "auto"
   );
-  const heroVisibility = useTransform(scrollYProgress, (progress) =>
-    progress >= 0.85 ? "hidden" : "visible"
+  const heroVisibility = useTransform(smoothProgress, (progress) =>
+    progress >= 0.90 ? "hidden" : "visible"
   );
 
-  // Stage 4: Stats section (z-20) slides up smoothly over the pinned hero (0.40 -> 1.00)
-  const nextSectionY = useTransform(scrollYProgress, [0.40, 1.00], ["40vh", "0vh"]);
+  // Stage 4: Next section (Stats) slides up & crossfades over hero (0.35 -> 0.95)
+  const nextSectionY = useTransform(smoothProgress, [0.35, 0.95], ["30vh", "0vh"]);
+  const nextSectionOpacity = useTransform(smoothProgress, [0.35, 0.70], [0, 1]);
 
   if (isMobileOrReduced) {
     return (
@@ -77,7 +84,7 @@ export const ScrollHeroTransition: React.FC<ScrollHeroTransitionProps> = ({
 
   return (
     <>
-      {/* 180vh PINNED HERO TRANSITION CONTAINER */}
+      {/* 180vh STABLE PINNED HERO TRANSITION CONTAINER */}
       <div ref={containerRef} className="relative h-[180vh]">
         {/* STICKY HERO VIEWPORT (Base dark navy canvas z-10) */}
         <div className="sticky top-0 h-screen overflow-hidden z-10 flex flex-col justify-center bg-[#0B1220]">
@@ -105,11 +112,13 @@ export const ScrollHeroTransition: React.FC<ScrollHeroTransitionProps> = ({
         </div>
       </div>
 
-      {/* NEXT SECTION (STATS) — Z-20 OVERLAYS THE COMPLETED HERO SEAMLESSLY */}
+      {/* NEXT SECTION (STATS) — Z-20 OVERLAYS THE HERO WITH CONTINUOUS OPACITY & Y CROSSFADE */}
       <motion.div
-        style={{ y: nextSectionY }}
-        className="relative z-20 bg-[#FBFBFA] -mt-[40vh]"
+        style={{ y: nextSectionY, opacity: nextSectionOpacity }}
+        className="relative z-20 bg-[#FBFBFA] -mt-[40vh] shadow-[0_-20px_50px_rgba(11,18,32,0.3)]"
       >
+        {/* Top Gradient Handoff Strip */}
+        <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#FBFBFA] pointer-events-none" />
         {nextSection}
       </motion.div>
     </>
