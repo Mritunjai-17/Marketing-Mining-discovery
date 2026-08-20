@@ -84,7 +84,7 @@ const RevealOnScroll: React.FC<{ children: React.ReactNode; className?: string }
 
 export const Stats: React.FC = () => {
   return (
-    <section className="relative bg-[#FBFBFA] text-[#1A1D21] border-y border-[#E5E4DE] font-sans">
+    <section className="relative bg-[#FBFBFA] text-[#1A1D21] border-b border-[#E5E4DE] font-sans">
       {/* Subtle Grain Overlay */}
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
 

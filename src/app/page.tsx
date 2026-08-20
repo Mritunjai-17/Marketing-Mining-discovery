@@ -9,13 +9,17 @@ import { TrustedBy } from "@/components/sections/TrustedBy";
 import { ServicesScrollStory } from "@/components/sections/ServicesScrollStory";
 
 export default function Home() {
+  // overflow-x-clip, not -hidden: "hidden" computes overflow-y to "auto", which makes
+  // this a scroll container and stops the hero's sticky child from pinning to the
+  // viewport. "clip" clips just as well without creating one.
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F2F2F0]">
+    <div className="relative min-h-screen overflow-x-clip bg-[#F2F2F0]">
       {/* ROTATING HEMISPHERE HERO */}
       <GlobeHero />
 
       {/* FOLLOWING SECTIONS (STATS, TRUSTED BY, SERVICES) */}
-      <div className="relative z-20 bg-[#FBFBFA]">
+      {/* Layout/stacking only — the surface belongs to Stats' own <section>. */}
+      <div className="relative z-20">
         <Stats />
       </div>
       <TrustedBy />

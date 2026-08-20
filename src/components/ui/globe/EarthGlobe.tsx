@@ -6,6 +6,8 @@ import { buildEarthTextures } from "./earthTexture";
 import {
   atmosphereFragmentShader,
   atmosphereVertexShader,
+  cloudFragmentShader,
+  cloudVertexShader,
   earthFragmentShader,
   earthVertexShader,
 } from "./shaders";
@@ -28,8 +30,29 @@ export interface ProjectedAnchor {
   opacity: number;
 }
 
+/**
+ * An orientation the globe can be aimed at, written through a ref so the hero can
+ * retarget it every frame without re-rendering this component.
+ */
+export interface GlobeFocus {
+  lat: number;
+  lng: number;
+  /**
+   * Radians of extra upward pitch. Aiming alone puts the coordinate at the centre of
+   * the projected disc, which sits below the container's crop in a horizon framing;
+   * this lifts it into the part that is actually on screen. The caller owns it because
+   * only the caller knows how much of the sphere its container leaves visible.
+   */
+  tiltBias: number;
+  /** 0 = free drift, 1 = fully aimed. Blended, so entering focus never snaps. */
+  weight: number;
+}
+
 export interface EarthGlobeProps {
   className?: string;
+  style?: React.CSSProperties;
+  /** Aim target, read every frame. Null or weight 0 leaves the globe drifting. */
+  focusRef?: React.RefObject<GlobeFocus | null>;
   /** Geographic points the caller wants projected to screen space every frame. */
   anchors?: GlobeAnchor[];
   /** Fired once per frame with projected anchors. Write to DOM refs here, never to state. */
@@ -40,12 +63,31 @@ export interface EarthGlobeProps {
   rotationPeriod?: number;
   /** Longitude facing the camera on first paint. */
   initialLongitude?: number;
+  /**
+   * Multiplier on the rotation speed, eased rather than applied instantly. 1 is the
+   * normal drift; the hero drops it while a marker is hovered so the site stays under
+   * the cursor without the globe snapping to a stop.
+   */
+  speedScale?: number;
 }
+
+/**
+ * Id of the synthetic anchor reporting where the current focus point landed on screen.
+ *
+ * Solving for it analytically is not enough: the axial roll sits outside the pitch, so
+ * it swings the tilt-bias offset sideways, and perspective bends the result again. The
+ * projection already knows the answer exactly, so it reports it instead.
+ */
+export const FOCUS_ANCHOR_ID = "__focus";
 
 /** Vertical field of view, kept narrow so a planet-scale sphere reads near-orthographic. */
 const FOV = 20;
-/** Fraction of the canvas box the sphere silhouette fills, leaving room for the haze. */
-const FIT = 0.9;
+/**
+ * Fraction of the canvas box the sphere silhouette fills, leaving room for the haze.
+ * Exported so the hero can derive a canvas size from the sphere diameter it wants.
+ */
+export const GLOBE_FIT = 0.9;
+const FIT = GLOBE_FIT;
 
 /** Radians the spin axis leans, close to the real 23.4 degree obliquity. */
 const AXIAL_TILT = THREE.MathUtils.degToRad(-19);
@@ -74,6 +116,11 @@ function latLngToVector3(lat: number, lng: number, target = new THREE.Vector3())
   );
 }
 
+/** Signed shortest way from a to b, so a blend never unwinds the long way round. */
+function shortestAngle(a: number, b: number) {
+  return ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+}
+
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1);
   return t * t * (3 - 2 * t);
@@ -81,11 +128,14 @@ function smoothstep(edge0: number, edge1: number, x: number) {
 
 export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   className = "",
+  style,
+  focusRef,
   anchors,
   onProject,
   onReady,
-  rotationPeriod = 46,
+  rotationPeriod = 52,
   initialLongitude = 18,
+  speedScale = 1,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -95,12 +145,16 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
   const onReadyRef = useRef(onReady);
   const anchorsRef = useRef(anchors);
   const rotationPeriodRef = useRef(rotationPeriod);
+  const speedScaleRef = useRef(speedScale);
+  const focusSourceRef = useRef(focusRef);
 
   useEffect(() => {
     onProjectRef.current = onProject;
     onReadyRef.current = onReady;
     anchorsRef.current = anchors;
     rotationPeriodRef.current = rotationPeriod;
+    speedScaleRef.current = speedScale;
+    focusSourceRef.current = focusRef;
   });
 
   useEffect(() => {
@@ -141,17 +195,29 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     camera.position.set(0, 0, 1 / Math.sin(silhouetteAngle));
     camera.lookAt(0, 0, 0);
 
-    // tiltGroup carries the viewing pitch and axial lean; the earth spins inside it.
+    // Three nested frames, and the nesting order is load-bearing.
+    //
+    // Aiming a coordinate at the camera is Rx(lat)·Ry(-(lng + 90))·v = (0, 0, 1). That
+    // identity only holds if nothing sits between the pitch and the spin, so the axial
+    // lean moves OUT to a parent and becomes a roll about the view axis — which leaves
+    // an already-centred point exactly where it is. With the lean in its old slot
+    // (rotation.z on the same group, applied to v before the pitch) every aim would be
+    // off by the tilt.
+    const rollGroup = new THREE.Group();
+    rollGroup.rotation.z = AXIAL_TILT;
+    scene.add(rollGroup);
+
+    // tiltGroup carries the viewing pitch; the earth spins inside it.
     const tiltGroup = new THREE.Group();
-    tiltGroup.rotation.set(VIEW_PITCH, 0, AXIAL_TILT);
-    scene.add(tiltGroup);
+    tiltGroup.rotation.x = VIEW_PITCH;
+    rollGroup.add(tiltGroup);
 
     const sunDirection = new THREE.Vector3(-0.62, 0.34, 0.7).normalize();
 
     // --- Atmosphere shell -------------------------------------------------------
     // Front-faced and depth-test free, so the haze washes over the limb of the earth
     // and fades to nothing at the centre of the disc.
-    const ATMOSPHERE_RADIUS = 1.035;
+    const ATMOSPHERE_RADIUS = 1.055;
     const atmosphereGeometry = new THREE.SphereGeometry(ATMOSPHERE_RADIUS, 96, 64);
     const atmosphereMaterial = new THREE.ShaderMaterial({
       vertexShader: atmosphereVertexShader,
@@ -159,9 +225,11 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       uniforms: {
         uColor: { value: new THREE.Color("#8FB3D9") },
         uSunDirection: { value: sunDirection },
-        uStrength: { value: 0.12 },
+        uStrength: { value: 0.34 },
         uLimb: { value: Math.sqrt(1 - 1 / (ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS)) },
-        uInnerFalloff: { value: 14 },
+        // Lower falloff spreads the haze further in from the limb, so the lit edge is a
+        // soft band rather than a thin bright line at horizon scale.
+        uInnerFalloff: { value: 9 },
       },
       transparent: true,
       depthWrite: false,
@@ -186,11 +254,31 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     );
     earth.rotation.y = THREE.MathUtils.degToRad(-(initialLongitude + 90));
     earth.visible = false;
+    earth.renderOrder = 1;
     tiltGroup.add(earth);
 
+    // --- Cloud shell ------------------------------------------------------------
+    // Its own mesh just above the surface, drifting slightly faster than the ground so
+    // the two layers separate as the planet turns.
+    const cloudGeometry = new THREE.SphereGeometry(
+      1.012,
+      isSmallViewport ? 64 : 96,
+      isSmallViewport ? 48 : 64
+    );
+    const cloudPlaceholder = new THREE.MeshBasicMaterial({ visible: false });
+    const clouds = new THREE.Mesh<THREE.SphereGeometry, THREE.Material>(
+      cloudGeometry,
+      cloudPlaceholder
+    );
+    clouds.visible = false;
+    clouds.renderOrder = 2;
+    tiltGroup.add(clouds);
+
     let earthMaterial: THREE.ShaderMaterial | null = null;
+    let cloudMaterial: THREE.ShaderMaterial | null = null;
     let dayTexture: THREE.CanvasTexture | null = null;
     let maskTexture: THREE.CanvasTexture | null = null;
+    let cloudTexture: THREE.CanvasTexture | null = null;
 
     // --- Sizing -----------------------------------------------------------------
     let width = canvas.clientWidth || 1;
@@ -222,17 +310,18 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
     const toCamera = new THREE.Vector3();
     const projected = new THREE.Vector3();
     const outerPoint = new THREE.Vector3();
+    const focusPoint = new THREE.Vector3();
     const results: ProjectedAnchor[] = [];
 
     const projectAnchors = () => {
       const list = anchorsRef.current;
       const report = onProjectRef.current;
-      if (!list || !list.length || !report) return;
+      if (!report) return;
 
       results.length = 0;
       earth.updateMatrixWorld();
 
-      for (const anchor of list) {
+      for (const anchor of list ?? []) {
         let base = anchorBase.get(anchor.id);
         if (!base) {
           base = latLngToVector3(anchor.lat, anchor.lng);
@@ -271,13 +360,64 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
         });
       }
 
+      // Report where the aim landed, so the caller can pin it under a CSS zoom without
+      // having to re-derive the projection.
+      const focus = focusSourceRef.current?.current ?? null;
+      if (focus && focus.weight > 0) {
+        latLngToVector3(focus.lat, focus.lng, focusPoint);
+        worldPoint.copy(focusPoint).applyMatrix4(earth.matrixWorld);
+        surfaceNormal.copy(worldPoint).normalize();
+        toCamera.copy(camera.position).sub(worldPoint).normalize();
+        projected.copy(worldPoint).project(camera);
+        results.push({
+          id: FOCUS_ANCHOR_ID,
+          x: (projected.x * 0.5 + 0.5) * width,
+          y: (-projected.y * 0.5 + 0.5) * height,
+          dirX: 0,
+          dirY: 0,
+          opacity: smoothstep(0.03, 0.16, surfaceNormal.dot(toCamera)),
+        });
+      }
+
       report(results);
     };
 
+    // Eased toward the requested scale so hovering a marker slows the drift smoothly
+    // instead of snapping it.
+    let currentSpeed = 1;
+    // The free drift is tracked separately from what is finally written to the mesh, so
+    // focus can blend against it and releasing focus resumes mid-drift with no jump.
+    let freeYaw = earth.rotation.y;
+    let cloudLead = 0;
+
     const renderFrame = (delta: number) => {
       if (delta > 0) {
-        earth.rotation.y += (delta * Math.PI * 2) / rotationPeriodRef.current;
+        const target = speedScaleRef.current;
+        currentSpeed += (target - currentSpeed) * Math.min(delta * 3.5, 1);
+
+        const turn = (delta * Math.PI * 2 * currentSpeed) / rotationPeriodRef.current;
+        freeYaw += turn;
+        // Slight parallax: the cloud sheet runs a touch ahead of the surface.
+        cloudLead += turn * 0.12;
       }
+
+      const focus = focusSourceRef.current?.current ?? null;
+      const weight = focus ? Math.min(Math.max(focus.weight, 0), 1) : 0;
+
+      if (weight > 0 && focus) {
+        // Ry brings the target's meridian round to face the camera, Rx lifts its
+        // latitude to the centre of the disc, and tiltBias then pushes it up into the
+        // slice of sphere the container actually shows.
+        const aimYaw = THREE.MathUtils.degToRad(-(focus.lng + 90));
+        const aimPitch = THREE.MathUtils.degToRad(focus.lat) - focus.tiltBias;
+        earth.rotation.y = freeYaw + shortestAngle(freeYaw, aimYaw) * weight;
+        tiltGroup.rotation.x = VIEW_PITCH + (aimPitch - VIEW_PITCH) * weight;
+      } else {
+        earth.rotation.y = freeYaw;
+        tiltGroup.rotation.x = VIEW_PITCH;
+      }
+      clouds.rotation.y = earth.rotation.y + cloudLead;
+
       renderer.render(scene, camera);
       projectAnchors();
     };
@@ -337,7 +477,7 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
 
     // --- Async texture build ----------------------------------------------------
     buildEarthTextures(isSmallViewport ? 2048 : 4096)
-      .then(({ day, mask }) => {
+      .then(({ day, mask, clouds: cloudMap }) => {
         if (disposed) return;
 
         const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -362,18 +502,52 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
             uMaskMap: { value: maskTexture },
             uMaskTexel: { value: new THREE.Vector2(1 / mask.width, 1 / mask.height) },
             uSunDirection: { value: sunDirection },
-            uHazeColor: { value: new THREE.Color("#7FA6CE") },
-            uCityLightColor: { value: new THREE.Color("#FFCC85") },
-            uAmbient: { value: 0.11 },
+            uHazeColor: { value: new THREE.Color("#9FC0DE") },
+            // Ambient is the flatness dial. Held high it lifts the unlit hemisphere up
+            // to meet the lit one and the sphere reads as a printed disc; dropped here
+            // to roughly a third, so the surface visibly turns away from the sun while
+            // the night side still keeps enough light to read against a white band.
+            uAmbient: { value: 0.17 },
             uSunIntensity: { value: 1.02 },
-            uReliefStrength: { value: 0.22 },
-            uCityLightStrength: { value: 0.5 },
+            // Relief is the only depth cue left once the tour zooms past the silhouette,
+            // so terrain has to carry it at close range.
+            uReliefStrength: { value: 0.45 },
             uHazeStrength: { value: 0.34 },
+            // Full opacity: at 0.74 a quarter of the white band bled through every pixel
+            // and flattened the shading before it reached the screen.
+            uOpacity: { value: 1.0 },
+            uDesaturate: { value: 0.16 },
+            uSpecularStrength: { value: 0.55 },
+            uLimbDarkening: { value: 0.38 },
           },
+          transparent: true,
+          depthWrite: false,
+          side: THREE.FrontSide,
+        });
+
+        cloudTexture = new THREE.CanvasTexture(cloudMap);
+        cloudTexture.colorSpace = THREE.SRGBColorSpace;
+        cloudTexture.wrapS = THREE.RepeatWrapping;
+        cloudTexture.wrapT = THREE.ClampToEdgeWrapping;
+        cloudTexture.anisotropy = maxAnisotropy;
+
+        cloudMaterial = new THREE.ShaderMaterial({
+          vertexShader: cloudVertexShader,
+          fragmentShader: cloudFragmentShader,
+          uniforms: {
+            uCloudMap: { value: cloudTexture },
+            uSunDirection: { value: sunDirection },
+            uOpacity: { value: isSmallViewport ? 0.4 : 0.5 },
+          },
+          transparent: true,
+          depthWrite: false,
+          side: THREE.FrontSide,
         });
 
         earth.material = earthMaterial;
         earth.visible = true;
+        clouds.material = cloudMaterial;
+        clouds.visible = true;
 
         renderFrame(0);
         onReadyRef.current?.();
@@ -393,17 +567,21 @@ export const EarthGlobe: React.FC<EarthGlobeProps> = ({
       document.removeEventListener("visibilitychange", syncRunState);
 
       earthGeometry.dispose();
+      cloudGeometry.dispose();
       atmosphereGeometry.dispose();
       atmosphereMaterial.dispose();
       placeholderMaterial.dispose();
+      cloudPlaceholder.dispose();
       earthMaterial?.dispose();
+      cloudMaterial?.dispose();
       dayTexture?.dispose();
       maskTexture?.dispose();
+      cloudTexture?.dispose();
       renderer.dispose();
     };
   }, [initialLongitude]);
 
-  return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={className} style={style} aria-hidden="true" />;
 };
 
 export default EarthGlobe;

@@ -19,6 +19,7 @@ import type { GeoPermissibleObjects } from "d3-geo";
 export interface EarthTextureResult {
   day: HTMLCanvasElement;
   mask: HTMLCanvasElement;
+  clouds: HTMLCanvasElement;
 }
 
 interface NoiseOptions {
@@ -99,32 +100,38 @@ function noiseSize(mapWidth: number) {
   return { w, h: w / 2 };
 }
 
-/** Latitude-banded terrain palette: ice, tundra, boreal, arid, tropic, ice. */
+/**
+ * Latitude-banded terrain palette: ice, tundra, boreal, arid, tropic, ice.
+ *
+ * Deliberately muted and mid-toned. The sphere is composited semi-transparently over a
+ * white card, which already lifts everything several stops, so a saturated palette here
+ * would wash out to pastel while a dark one would fight the airy look.
+ */
 function terrainGradient(ctx: CanvasRenderingContext2D, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0.0, "#DFE6E8");
-  g.addColorStop(0.06, "#93A29B");
-  g.addColorStop(0.14, "#5C6B58");
-  g.addColorStop(0.26, "#4E5C48");
-  g.addColorStop(0.36, "#6B6E4B");
-  g.addColorStop(0.44, "#7A7550");
-  g.addColorStop(0.52, "#4F6144");
-  g.addColorStop(0.6, "#5C6446");
-  g.addColorStop(0.68, "#75714E");
-  g.addColorStop(0.78, "#5A6449");
-  g.addColorStop(0.88, "#8B968F");
-  g.addColorStop(1.0, "#DFE6E8");
+  g.addColorStop(0.0, "#E4E8E8");
+  g.addColorStop(0.06, "#A3ADA5");
+  g.addColorStop(0.14, "#78846F");
+  g.addColorStop(0.26, "#6C7A64");
+  g.addColorStop(0.36, "#87866A");
+  g.addColorStop(0.44, "#948E70");
+  g.addColorStop(0.52, "#6D7B62");
+  g.addColorStop(0.6, "#78805F");
+  g.addColorStop(0.68, "#8F8B6D");
+  g.addColorStop(0.78, "#77806A");
+  g.addColorStop(0.88, "#9EA6A0");
+  g.addColorStop(1.0, "#E4E8E8");
   return g;
 }
 
-/** Deep, desaturated navy ocean that stays lighter toward the poles. */
+/** Soft blue-grey ocean, lighter toward the poles. */
 function oceanGradient(ctx: CanvasRenderingContext2D, h: number) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0.0, "#1B3A56");
-  g.addColorStop(0.16, "#122C48");
-  g.addColorStop(0.5, "#081A31");
-  g.addColorStop(0.84, "#122C48");
-  g.addColorStop(1.0, "#1B3A56");
+  g.addColorStop(0.0, "#5B7791");
+  g.addColorStop(0.16, "#4C6883");
+  g.addColorStop(0.5, "#3B586F");
+  g.addColorStop(0.84, "#4C6883");
+  g.addColorStop(1.0, "#5B7791");
   return g;
 }
 
@@ -253,7 +260,48 @@ function paintMaskMap(land: GeoPermissibleObjects, w: number): HTMLCanvasElement
 }
 
 /**
- * Builds both maps. The TopoJSON is pulled in via dynamic import so the ~750KB atlas
+ * White cloud sheet on its own transparent canvas.
+ *
+ * fBm luminance is remapped to alpha through a soft threshold, so the low end opens up
+ * into clear sky and the high end forms banded cloud masses. Alpha stays well under 1 —
+ * this layer is meant to soften the planet, not to hide it.
+ */
+function paintCloudMap(w: number): HTMLCanvasElement {
+  const h = w / 2;
+  const canvas = makeCanvas(w, h);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  const noise = createFractalNoise(w, h, {
+    seed: 7717,
+    octaves: 6,
+    lo: 40,
+    hi: 232,
+    falloff: 0.42,
+  });
+  ctx.drawImage(noise, 0, 0);
+
+  const image = ctx.getImageData(0, 0, w, h);
+  const data = image.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const luminance = data[i] / 255;
+    // Soft threshold: nothing below 0.46, ramping to full cloud by 0.86.
+    const t = Math.min(Math.max((luminance - 0.46) / 0.4, 0), 1);
+    const coverage = t * t * (3 - 2 * t);
+
+    data[i] = 255;
+    data[i + 1] = 255;
+    data[i + 2] = 255;
+    data[i + 3] = Math.round(coverage * 208);
+  }
+
+  ctx.putImageData(image, 0, 0);
+  return canvas;
+}
+
+/**
+ * Builds the maps. The TopoJSON is pulled in via dynamic import so the ~750KB atlas
  * lands in its own chunk, fetched after the hero has already painted.
  */
 export async function buildEarthTextures(dayWidth: number): Promise<EarthTextureResult> {
@@ -276,5 +324,8 @@ export async function buildEarthTextures(dayWidth: number): Promise<EarthTexture
   return {
     day: paintDayMap(land, borders, dayWidth),
     mask: paintMaskMap(land, Math.max(1024, Math.round(dayWidth / 2))),
+    // Clouds are soft, low-frequency shapes; half the day map's resolution is plenty
+    // and keeps the per-pixel alpha remap cheap.
+    clouds: paintCloudMap(Math.max(1024, Math.round(dayWidth / 2))),
   };
 }
