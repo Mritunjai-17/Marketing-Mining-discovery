@@ -229,7 +229,7 @@ function clamp(v: number, lo: number, hi: number) {
 
 export const GlobeHero: React.FC = () => {
   const rangeRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLDivElement>(null);
   const globeBoxRef = useRef<HTMLDivElement>(null);
   const markerLayerRef = useRef<HTMLDivElement>(null);
@@ -628,51 +628,58 @@ export const GlobeHero: React.FC = () => {
 
   const handleReady = useCallback(() => setReady(true), []);
 
-  // The tour needs scroll distance that the hero itself does not have, so the band is
-  // parked inside a tall range: the outer div supplies STAGE_COUNT viewports of travel,
-  // and the sticky child stays on screen for all of it, unpinning only once the last
-  // stop is done. Progress across that range is what stageAt() consumes.
+  // Two blocks, and the split is the whole point of the sequence.
   //
-  // Everything else is unchanged from the full-bleed band: one surface, one set of
-  // paddings, no border and no shadow, heading/subtitle/globe as direct flow children.
-  // overflow-hidden still crops the planet at the band's floor.
+  // The copy is an ordinary flow child: it simply scrolls off the top, no pinning, no
+  // scroll-linked anything. Underneath it the globe range supplies STAGE_COUNT viewports
+  // of travel and pins its own child for all of it.
+  //
+  // Because the range starts where the copy ends, the range's top edge reaching the top
+  // of the viewport is the same instant the copy finishes leaving — and that instant is
+  // progress 0, so the tour starts itself with no coordination between the two.
+  //
+  // Nothing carries hero-rise any more: its fadeInUp holds transform: translateY(0)
+  // under fill-mode both, and a lingering transform on a sticky element's ancestor
+  // creates a containing block for it. The heading, subtitle and globe each keep their
+  // own entrance, so the effect survives without the wrapper's.
   return (
-    <div
-      ref={rangeRef}
-      className="relative"
-      // One viewport of travel per stop, derived from the tour so the two cannot drift.
-      style={{ height: reduceMotion ? "100vh" : `${STAGE_COUNT * 100}vh` }}
-    >
-      <div className="sticky top-0 h-screen w-full">
-        <section
+    <section className="relative w-full bg-white">
+      {/* Copy — normal flow, scrolls away before anything pins. */}
+      <div className="flex flex-col items-center px-6 pb-20 pt-[148px] text-center sm:px-10 lg:pb-24 lg:pt-[196px]">
+        <h1 className="hero-rise [animation-delay:120ms] max-w-[16ch] font-geist font-semibold leading-[1.04] tracking-[-0.035em] text-[#15181C] text-[clamp(2.5rem,5.2vw,4.5rem)]">
+          All over the world
+        </h1>
+
+        <p className="hero-rise [animation-delay:220ms] mt-6 max-w-[30ch] font-geist font-normal leading-[1.45] tracking-[-0.01em] text-[#57595E] text-[clamp(1.125rem,1.7vw,1.625rem)] sm:mt-7 sm:max-w-[34ch] lg:mt-8">
+          Meet our distributed team of experts working across 6 continents.
+        </p>
+      </div>
+
+      {/* Globe range — its top edge is where the tour begins. */}
+      <div
+        ref={rangeRef}
+        className="relative"
+        // One viewport of travel per stop, derived from the tour so the two cannot drift.
+        style={{ height: reduceMotion ? "100vh" : `${STAGE_COUNT * 100}vh` }}
+      >
+        {/*
+          The pinned frame. It is also what the markers are clipped to, so cardRef lives
+          here rather than on the section: the visible frame is now one viewport, not the
+          whole band, and clipping against the band would never hide anything.
+          overflow-hidden crops the planet, and it is safe on this element — only an
+          overflow ancestor would break the stickiness, never the sticky element itself.
+        */}
+        <div
           ref={cardRef}
-          className="
-            hero-rise
-            relative flex h-full w-full flex-col items-center overflow-hidden
-            bg-white
-            px-6 pt-[148px] text-center sm:px-10 lg:pt-[196px]
-          "
+          className="sticky top-0 h-screen w-full overflow-hidden bg-white"
         >
-          {/* Copy */}
-          <h1 className="hero-rise [animation-delay:120ms] max-w-[16ch] font-geist font-semibold leading-[1.04] tracking-[-0.035em] text-[#15181C] text-[clamp(2.5rem,5.2vw,4.5rem)]">
-            All over the world
-          </h1>
-
-          <p className="hero-rise [animation-delay:220ms] mt-6 max-w-[30ch] font-geist font-normal leading-[1.45] tracking-[-0.01em] text-[#57595E] text-[clamp(1.125rem,1.7vw,1.625rem)] sm:mt-7 sm:max-w-[34ch] lg:mt-8">
-            Meet our distributed team of experts working across 6 continents.
-          </p>
-
           {/*
-            Globe slot — a plain flow child. Its top margin is the padding under the
-            subtitle; flex-1 runs it to the card's bottom edge, and the negative inline
-            margins let the planet bleed past the copy's gutters so it is cropped by the
-            card itself instead of by the text column. No background, border or shadow of
-            its own: the white behind the sphere is the card's.
+            The globe slot is now the whole pinned viewport rather than the leftovers
+            under the copy, so horizonDiameter() sizes the planet against a much squarer
+            frame and roughly half the sphere reads instead of a shallow arc. No padding
+            to break out of any more — the copy's gutters are on the block above.
           */}
-          <div
-            ref={slotRef}
-            className="relative -mx-6 mt-10 w-[calc(100%+3rem)] flex-1 sm:-mx-10 sm:w-[calc(100%+5rem)] lg:mt-12"
-          >
+          <div ref={slotRef} className="relative h-full w-full">
             {/* Layer 2 + 3 — globe, clouds and atmosphere */}
             <div
               ref={globeBoxRef}
@@ -804,9 +811,9 @@ export const GlobeHero: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

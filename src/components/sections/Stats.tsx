@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
@@ -10,6 +10,8 @@ export interface StatItem {
   valueDisplay: string;
   label: string;
   description: string;
+  image: string;
+  imageAlt: string;
 }
 
 const STATS_DATA: StatItem[] = [
@@ -18,30 +20,40 @@ const STATS_DATA: StatItem[] = [
     valueDisplay: "150,000+",
     label: "Active Monthly Audience",
     description: "Institutional investors, mining executives, and industry analysts reading market updates.",
+    image: "/stats/audience-analysts.jpg",
+    imageAlt: "Analysts and investors monitoring live mining market data screens",
   },
   {
     numericValue: 40000,
     valueDisplay: "40,000+",
     label: "Newsletter Subscribers",
     description: "Weekly executive briefing delivered directly to decision-maker inboxes worldwide.",
+    image: "/stats/newsletter-briefing.jpg",
+    imageAlt: "Mining executive reviewing a printed industry briefing report",
   },
   {
     numericValue: 450,
     valueDisplay: "450+",
     label: "Mining Companies Featured",
     description: "From junior exploration companies to Tier-1 global mining producers.",
+    image: "/stats/open-pit-mine.jpg",
+    imageAlt: "Aerial wide shot of a large open-pit mining operation",
   },
   {
     numericValue: 8,
     valueDisplay: "8+",
     label: "Years Industry Coverage",
     description: "Established track record of independent editorial authority and market intelligence.",
+    image: "/stats/drill-core-geologist.jpg",
+    imageAlt: "Geologist examining drill core samples on a core-logging bench",
   },
   {
     numericValue: 30,
     valueDisplay: "30+",
     label: "Mining Jurisdictions",
     description: "Extensive reach across key financial capitals and global mining jurisdictions.",
+    image: "/stats/mining-jurisdictions-map.jpg",
+    imageAlt: "World map marked with active mining sites across global jurisdictions",
   },
 ];
 
@@ -83,6 +95,41 @@ const RevealOnScroll: React.FC<{ children: React.ReactNode; className?: string }
 };
 
 export const Stats: React.FC = () => {
+  // Single source of truth: the same active index drives which stat row is
+  // highlighted on the right AND which feature image is shown on the left.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const statRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const setStatRef = useCallback(
+    (index: number) => (node: HTMLDivElement | null) => {
+      statRefs.current[index] = node;
+    },
+    []
+  );
+
+  useEffect(() => {
+    const nodes = statRefs.current.filter((node): node is HTMLDivElement => node !== null);
+    if (nodes.length === 0) return;
+
+    // A thin band across the vertical centre of the viewport. Whichever stat row
+    // crosses that band is the active one. When no row crosses it (in the gap
+    // between two rows) we simply keep the last index, so the left image never
+    // flickers back to a default mid-scroll.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = statRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (index !== -1) setActiveIndex(index);
+        }
+      },
+      { root: null, rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+    );
+
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="relative bg-[#FBFBFA] text-[#1A1D21] border-b border-[#E5E4DE] font-sans">
       {/* Subtle Grain Overlay */}
@@ -91,11 +138,11 @@ export const Stats: React.FC = () => {
       {/* Main Container */}
       <div className="relative w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-20 lg:py-28">
         <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-24">
-          
+
           {/* LEFT COLUMN: Human Editorial Sticky Block */}
           <div className="w-full lg:w-5/12 lg:sticky lg:top-[120px]">
             <div className="flex flex-col items-start gap-6 lg:pr-6">
-              
+
               {/* Subtle Gold Hairline Divider */}
               <div className="w-12 h-0.5 bg-[#B8860B]" />
 
@@ -109,15 +156,22 @@ export const Stats: React.FC = () => {
                 "One platform. Every major mining audience."
               </h2>
 
-              {/* Mining Editorial Feature Image */}
+              {/* Mining Editorial Feature Image — crossfades in sync with the active stat */}
               <div className="w-full mt-2 rounded-xl overflow-hidden border border-[#E5E4DE] shadow-md relative group aspect-[16/10] max-h-[250px] sm:max-h-[270px]">
-                <Image
-                  src="/mining-stats.png"
-                  alt="Mining Discovery Editorial Operations"
-                  width={600}
-                  height={375}
-                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                />
+                {STATS_DATA.map((stat, index) => (
+                  <Image
+                    key={stat.image}
+                    src={stat.image}
+                    alt={stat.imageAlt}
+                    width={600}
+                    height={375}
+                    priority={index === 0}
+                    aria-hidden={index !== activeIndex}
+                    className={`absolute inset-0 w-full h-full object-cover transition-[opacity,transform] duration-500 ease-in-out group-hover:scale-[1.03] ${
+                      index === activeIndex ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                ))}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/30 via-transparent to-transparent opacity-40 pointer-events-none" />
               </div>
             </div>
@@ -125,7 +179,7 @@ export const Stats: React.FC = () => {
 
           {/* RIGHT COLUMN: Natural Editorial Flow */}
           <div className="w-full lg:w-7/12 flex flex-col gap-14 lg:gap-16 lg:pl-10 border-t lg:border-t-0 lg:border-l border-[#E5E4DE] pt-12 lg:pt-0">
-            
+
             {/* INTRO SENTENCE BLOCK (First item above 150,000+ with RevealOnScroll effect) */}
             <RevealOnScroll>
               <div className="pb-10 border-b border-[#E5E4DE]">
@@ -137,11 +191,15 @@ export const Stats: React.FC = () => {
 
             {/* STATS LIST (Clean Editorial Rows) */}
             <div className="flex flex-col gap-12 sm:gap-16">
-              {STATS_DATA.map((stat) => {
+              {STATS_DATA.map((stat, index) => {
                 return (
                   <RevealOnScroll key={stat.label}>
-                    <div className="group flex flex-col gap-2 pb-10 border-b border-[#E5E4DE] last:border-b-0">
-                      
+                    <div
+                      ref={setStatRef(index)}
+                      data-active={index === activeIndex}
+                      className="group flex flex-col gap-2 pb-10 border-b border-[#E5E4DE] last:border-b-0"
+                    >
+
                       {/* Oversized Human Serif Stat Number */}
                       <div className="font-serif text-6xl sm:text-7xl lg:text-8xl font-normal text-[#0B1F3A] tracking-tight leading-none group-hover:text-[#B8860B] transition-colors duration-300">
                         {stat.valueDisplay}
@@ -166,7 +224,7 @@ export const Stats: React.FC = () => {
             {/* EDITORIAL CALLOUT BLOCK (Exact Screenshot Design) */}
             <RevealOnScroll>
               <div className="flex flex-col gap-8 pt-4">
-                
+
                 {/* Paragraph 1 */}
                 <p className="font-sans text-xl sm:text-2xl font-medium text-[#1A1D21] leading-snug sm:leading-snug max-w-xl">
                   With direct access to institutional investors and industry analysts, your company's news reaches the decision-makers who matter most in global mining.
@@ -210,6 +268,3 @@ export const Stats: React.FC = () => {
     </section>
   );
 };
-
-
-
