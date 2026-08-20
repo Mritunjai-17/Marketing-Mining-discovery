@@ -1,38 +1,73 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
-interface CompanyLogo {
+interface Company {
   name: string;
-  ticker: string;
-  symbol: string;
+  logo: string;
 }
 
-const companyLogos: CompanyLogo[] = [
-  { name: "Barrick Gold", ticker: "NYSE: GOLD", symbol: "BG" },
-  { name: "Freeport-McMoRan", ticker: "NYSE: FCX", symbol: "FC" },
-  { name: "Teck Resources", ticker: "TSX: TECK", symbol: "TR" },
-  { name: "Filo Mining", ticker: "TSX: FILO", symbol: "FM" },
-  { name: "Lundin Mining", ticker: "TSX: LUN", symbol: "LM" },
-  { name: "Aura Minerals", ticker: "TSX: ORA", symbol: "AM" },
-  { name: "Alamos Gold", ticker: "NYSE: AGI", symbol: "AG" },
-  { name: "Anglo American", ticker: "LSE: AAL", symbol: "AA" },
-  { name: "First Quantum", ticker: "TSX: FM", symbol: "FQ" },
-  { name: "Pan American Silver", ticker: "NASDAQ: PAAS", symbol: "PA" },
-  { name: "Capstone Copper", ticker: "TSX: CS", symbol: "CC" },
-  { name: "Equinox Gold", ticker: "NYSE: EQX", symbol: "EG" },
-  { name: "Osisko Gold", ticker: "NYSE: OR", symbol: "OG" },
-  { name: "Lundin Gold", ticker: "TSX: LUG", symbol: "LG" },
-  { name: "SSR Mining", ticker: "NASDAQ: SSRM", symbol: "SS" },
-  { name: "Eldorado Gold", ticker: "NYSE: EGO", symbol: "EG" },
-  { name: "Torex Gold", ticker: "TSX: TXG", symbol: "TG" },
-  { name: "Kinross Gold", ticker: "NYSE: KGC", symbol: "KG" },
-  { name: "Hudbay Minerals", ticker: "TSX: HBM", symbol: "HM" },
-  { name: "Dundee Precious", ticker: "TSX: DPM", symbol: "DP" },
+const companies: Company[] = [
+  { name: "Arras Minerals", logo: "/companies/arras-minerals.png" },
+  { name: "Afrikor", logo: "/companies/afrikor.png" },
+  { name: "Arizona Gold & Silver", logo: "/companies/arizona-gold-silver.png" },
+  { name: "Astra Exploration", logo: "/companies/astra-exploration.png" },
+  { name: "Aurion Resources", logo: "/companies/aurion-resources.png" },
+  { name: "Bluenergies", logo: "/companies/bluenergies.png" },
+  { name: "Bactech", logo: "/companies/bactech.png" },
+  { name: "Digipower X", logo: "/companies/digipower-x.png" },
+  { name: "Gold Hunter Resources", logo: "/companies/gold-hunter-resources.png" },
+  { name: "Golkor", logo: "/companies/golkor.png" },
+  { name: "Guanajuato", logo: "/companies/guanajuato.png" },
+  { name: "Harfang", logo: "/companies/harfang.png" },
+  { name: "He Capital", logo: "/companies/he-capital.png" },
+  { name: "Kodiak Copper", logo: "/companies/kodiak-copper.png" },
+  { name: "Leviathan", logo: "/companies/leviathan.png" },
+  { name: "Loyalist", logo: "/companies/loyalist.png" },
+  { name: "Mining Investment Event", logo: "/companies/mining-investment-event.png" },
+  { name: "Noble Plains", logo: "/companies/noble-plains.png" },
+  { name: "Pan Global", logo: "/companies/pan-global.png" },
+  { name: "Phenom Resources", logo: "/companies/phenom-resources.png" },
+  { name: "Power Metallic", logo: "/companies/power-metallic.png" },
+  { name: "SilverWolf", logo: "/companies/silverwolf.png" },
+  { name: "Spacekor", logo: "/companies/spacekor.png" },
+  { name: "US Gold", logo: "/companies/us-gold.png" },
+  { name: "USDC", logo: "/companies/usdc.png" },
+  { name: "Vivio Power", logo: "/companies/vivio-power.png" },
+  { name: "West Red Lake", logo: "/companies/west-red-lake.png" },
 ];
 
+/*
+ * One marquee item. Renders the real logo when the PNG exists in /public/companies
+ * and falls back to a plain text wordmark when it 404s, so dropping files into that
+ * folder later swaps them in with no code change. Plain <img> rather than
+ * next/image: the optimizer treats a missing local file as a hard error, while a
+ * bare <img> just fires onError, which is exactly the signal we want.
+ */
+const CompanyLogo: React.FC<{ company: Company }> = ({ company }) => {
+  const [logoAvailable, setLogoAvailable] = useState(true);
+
+  return (
+    <div className="mr-12 flex flex-shrink-0 items-center opacity-70 grayscale transition-all duration-300 ease-out hover:opacity-100 hover:grayscale-0">
+      {logoAvailable ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={company.logo}
+          alt={`${company.name} logo`}
+          className="h-9 w-auto max-w-[170px] object-contain"
+          onError={() => setLogoAvailable(false)}
+        />
+      ) : (
+        <span className="whitespace-nowrap font-sans text-lg font-semibold tracking-tight text-[#57595E]">
+          {company.name}
+        </span>
+      )}
+    </div>
+  );
+};
+
 export const TrustedBy: React.FC = () => {
-  const marqueeLogos = [...companyLogos, ...companyLogos];
+  const marqueeCompanies = [...companies, ...companies];
 
   return (
     <section className="py-12 md:py-16 bg-[#F4F4F2] border-b border-[#E5E5E3] overflow-hidden font-sans">
@@ -43,33 +78,15 @@ export const TrustedBy: React.FC = () => {
       </div>
 
       {/* Infinite Auto-Scrolling Marquee Container */}
-      <div className="relative w-full overflow-hidden">
+      <div className="marquee-viewport relative w-full overflow-x-hidden">
         {/* Left & Right Gradient Fade Masks */}
         <div className="absolute top-0 left-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#F4F4F2] to-transparent z-10 pointer-events-none" />
         <div className="absolute top-0 right-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#F4F4F2] to-transparent z-10 pointer-events-none" />
 
         {/* Marquee Track */}
-        <div className="animate-marquee gap-6 px-4">
-          {marqueeLogos.map((logo, index) => (
-            <div
-              key={`${logo.name}-${index}`}
-              className="group flex-shrink-0 bg-[#FAFAF9] border border-[#E5E5E3] hover:border-[#0B1F3A]/40 hover:bg-white rounded-md px-5 py-3.5 flex items-center gap-3 transition-all duration-300 grayscale hover:grayscale-0 cursor-pointer shadow-2xs hover:shadow-md"
-            >
-              {/* Emblem */}
-              <div className="w-8 h-8 rounded bg-[#0B1F3A]/10 group-hover:bg-[#0B1F3A] text-[#0B1F3A] group-hover:text-[#B8860B] flex items-center justify-center font-serif text-xs font-normal transition-colors">
-                {logo.symbol}
-              </div>
-
-              {/* Company Info */}
-              <div className="flex flex-col text-left font-sans">
-                <span className="font-serif text-sm font-normal text-[#1A1D21] group-hover:text-[#0B1F3A] transition-colors leading-tight whitespace-nowrap">
-                  {logo.name}
-                </span>
-                <span className="font-mono text-[10px] text-[#57595E]/80 group-hover:text-[#B8860B] transition-colors uppercase tracking-wider">
-                  {logo.ticker}
-                </span>
-              </div>
-            </div>
+        <div className="marquee-track flex w-max flex-row flex-nowrap items-center">
+          {marqueeCompanies.map((company, index) => (
+            <CompanyLogo key={`${company.name}-${index}`} company={company} />
           ))}
         </div>
       </div>
