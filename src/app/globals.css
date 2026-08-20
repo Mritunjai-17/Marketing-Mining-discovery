@@ -20,6 +20,7 @@
   --color-muted-text: #57595E;
 
   --font-serif: var(--font-serif-custom), "DM Serif Display", Georgia, serif;
+  --font-geist: var(--font-geist-custom), "Geist", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: var(--font-sans-custom), "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: var(--font-mono-custom), "IBM Plex Mono", monospace;
 
@@ -103,38 +104,22 @@ nextjs-portal,
   animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Globe Breathing Float Animation */
-@keyframes floatBreathing {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+/*
+ * Hero entrance. Driven by CSS rather than a JS motion library so that
+ * prefers-reduced-motion is honoured on the very first paint — a hook cannot,
+ * because the initial client render has to match the server HTML.
+ * `both` fill keeps the from-state applied through any animation-delay.
+ */
+.hero-rise {
+  opacity: 0;
+  animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.animate-float-slow {
-  animation: floatBreathing 6s ease-in-out infinite;
-}
-
-/* Continuous Marquee Animation */
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise {
+    animation: none;
+    opacity: 1;
   }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 35s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
 }
 
 /* Custom Scrollbar for sleek editorial feel */

@@ -35,6 +35,9 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
 
     lenisRef.current = lenis;
 
+    // Expose lenis globally for zero-conflict scrollTo integration
+    (window as any).lenis = lenis;
+
     // Synchronize Lenis momentum scroll updates with GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -49,6 +52,9 @@ export const SmoothScroll: React.FC<SmoothScrollProps> = ({ children }) => {
       gsap.ticker.remove(updateGSAP);
       lenis.destroy();
       lenisRef.current = null;
+      if ((window as any).lenis === lenis) {
+        delete (window as any).lenis;
+      }
     };
   }, []);
 

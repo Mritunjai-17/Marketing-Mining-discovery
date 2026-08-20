@@ -1,4 +1,6 @@
 export * from "./Hero";
+export * from "./WorldMapHero";
+export * from "./GlobeHero";
 export * from "./Stats";
 export * from "./TrustedBy";
 export * from "./Services";

@@ -63,7 +63,9 @@ export const Header: React.FC = () => {
             <Link
               key={link.name}
               href={link.href}
-              className="text-xs font-semibold uppercase tracking-wider text-white/90 hover:text-[#D4AF37] transition-colors duration-300"
+              className={`text-xs font-semibold uppercase tracking-wider hover:text-[#B8860B] transition-colors duration-300 ${
+                isScrolled ? "text-white/90 hover:text-[#D4AF37]" : "text-[#1A1D21]"
+              }`}
             >
               {link.name}
             </Link>
@@ -86,7 +88,9 @@ export const Header: React.FC = () => {
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
-          className="lg:hidden p-1.5 rounded-md focus:outline-none transition-colors text-white hover:bg-white/10"
+          className={`lg:hidden p-1.5 rounded-md focus:outline-none transition-colors ${
+            isScrolled ? "text-white hover:bg-white/10" : "text-[#1A1D21] hover:bg-black/5"
+          }`}
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
