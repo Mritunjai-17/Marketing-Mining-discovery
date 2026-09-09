@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #0B0D0E;
+    --foreground: #F4F4F0;
+    --card: #121417;
+    --card-foreground: #F4F4F0;
+    --popover: #121417;
+    --popover-foreground: #F4F4F0;
+    --primary: #F4F4F0;
+    --primary-foreground: #0B0D0E;
+    --secondary: #17191C;
+    --secondary-foreground: #D0D4D9;
+    --muted: #1A1C20;
+    --muted-foreground: #8A9099;
+    --accent: #C5A059;
+    --accent-foreground: #0B0D0E;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --border-accent: rgba(197, 160, 89, 0.3);
+    
+    --font-serif-family: var(--font-instrument-serif), Georgia, serif;
+    --font-sans-family: var(--font-geist-sans), system-ui, sans-serif;
+    --font-mono-family: var(--font-geist-mono), monospace;
+  }
+}
+
+/* Base Body Styles */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans-family);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection */
+::selection {
+  background: rgba(197, 160, 89, 0.25);
+  color: #F4F4F0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0D0E;
+}
+::-webkit-scrollbar-thumb {
+  background: #22252A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333840;
+}
+
+/* Editorial Typography System */
+.text-display-xl {
+  font-family: var(--font-serif-family);
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+.text-display-lg {
+  font-family: var(--font-serif-family);
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  font-weight: 400;
+}
+
+.text-heading {
+  font-family: var(--font-sans-family);
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 300;
+}
+
+.text-body {
+  font-family: var(--font-sans-family);
+  font-size: clamp(0.95rem, 1.2vw, 1.125rem);
+  line-height: 1.65;
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+
+.text-eyebrow {
+  font-family: var(--font-mono-family);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.text-caption {
+  font-family: var(--font-mono-family);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #6C727C;
+}
+
+.text-navigation {
+  font-family: var(--font-sans-family);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Utility noise grid background for subtle texture without heavy graphics */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Subtle glow for node signals */
+.signal-glow {
+  box-shadow: 0 0 25px rgba(197, 160, 89, 0.15);
+}
+
+/* Focus styles for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
