@@ -321,7 +321,8 @@ export default function HeroSignal({ className = '' }: HeroSignalProps) {
     // Background network points layered between the primaries. These are not new
     // nodes: they are promoted out of the pool the wordmark already allocated, so
     // the total node count, physics cost and wordmark resolution stay the same.
-    const ambientCount = width < 640 ? 58 : width < 1024 ? 120 : 130;
+    // Visible globe totals: 112 mobile, 200 tablet/desktop, 220 wide.
+    const ambientCount = width < 640 ? 58 : width < 1024 ? 120 : 110;
     // Total dots the formed wordmark aims for (primary + ambient + detail). Tuned
     // so a capital letter is ~6.5-8 dots tall at every breakpoint.
     const wordmarkBudget = width < 640 ? 360 : width < 1024 ? 460 : 560;
